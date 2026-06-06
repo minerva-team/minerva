@@ -1,11 +1,9 @@
-```markdown
 <div align="center">
 
   <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Owl.png" alt="Owl" width="80" height="80" />
   
   <h1>Minerva (مینروا)</h1>
   <p><b>سامانه هوشمند و یکپارچه مدیریت مالی و منابع انسانی (HRM & ERP)</b></p>
-  <p>پروژه پایانی درس مهندسی نرم‌افزار ۲ - دانشگاه ارومیه</p>
 
   <br />
 
@@ -45,30 +43,7 @@ minerva/
 
 ---
 
-## 🚀 راهنمای راه‌اندازی سریع (Getting Started)
 
-### ۱. راه‌اندازی بخش بک‌اند (Django)
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # در ویندوز: venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-
-```
-
-### ۲. راه‌اندازی بخش فرانت‌اند (Next.js)
-
-```bash
-cd frontend
-npm install
-npm run dev
-
-```
-
----
 
 ## 👥 اعضای تیم توسعه (Team MAMSSA)
 
