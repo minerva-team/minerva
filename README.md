@@ -52,7 +52,7 @@ minerva/
 | --- | --- | --- | --- |
 |  | **سجر پورجعفر** |  | [@saharp51022-creator](https://github.com/saharp51022-creator) |
 |  | **آویسا فیضی** | | [@Avisaoops](https://github.com/Avisaoops) |
-|  | **مهتاب صبری** | | [@Mh-Saberi](https://github.com/Mh-Saberi) |
+|  | **مهتاب صابری** | | [@Mh-Saberi](https://github.com/Mh-Saberi) |
 |  | **علیرضا شیخ‌احمدی** || [@Alirezasha1](https://github.com/Alirezasha1) |
 |  | **سید محمد عنبری** || [@Smohammad-anbari](https://github.com/mmd-anbari) |
 |  | **شاهین زمانی** | | [@shahinzam101](https://github.com/shahinzam101) |
