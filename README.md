@@ -4,7 +4,6 @@
   
   <h1>Minerva (مینروا)</h1>
   <p><b>سامانه هوشمند و یکپارچه مدیریت مالی و منابع انسانی (HRM & ERP)</b></p>
-  <p>پروژه پایانی درس مهندسی نرم‌افزار ۲ - دانشگاه ارومیه</p>
 
   <br />
 
@@ -45,15 +44,15 @@ minerva/
 
 
 
-## 👥 اعضای تیم توسعه (Team MAMSSA)
+## 👥 اعضای تیم توسعه 
 
-این پروژه با همکاری اعضای تیم **مامسا** طراحی و توسعه یافته است:
+این پروژه با همکاری اعضای تیم  طراحی و توسعه یافته است:
 
 | پروفایل | نام و نام‌خانوادگی | نقش در پروژه | اکانت گیت‌هاب |
 | --- | --- | --- | --- |
-|  | **سجر پورجعفر** | تحلیل‌گر سیستم / مستندسازی | [@saharp51022-creator](https://github.com/saharp51022-creator) |
-|  | **آویسا فیضی** | توسعه‌دهنده فرانت‌اند / داکیومنت | [@Avisaoops](https://github.com/Avisaoops) |
-|  | **مهتاب صبری** | طراح UI/UX / توسعه‌دهنده فرانت‌اند | [@Mh-Saberi](https://github.com/Mh-Saberi) |
-|  | **علیرضا شیخ‌احمدی** | توسعه‌دهنده بک‌اند / طراح دیتابیس | [@Alirezasha1](https://github.com/Alirezasha1) |
-|  | **سید محمد عنبری** | توسعه‌دهنده فرانت‌اند | [@Smohammad-anbari](https://github.com/mmd-anbari) |
-|  | **شاهین زمانی** | مدیر پروژه / توسعه‌دهنده بک‌اند | [@shahinzam101](https://github.com/shahinzam101) |
+|  | **سجر پورجعفر** |  | [@saharp51022-creator](https://github.com/saharp51022-creator) |
+|  | **آویسا فیضی** | | [@Avisaoops](https://github.com/Avisaoops) |
+|  | **مهتاب صبری** | | [@Mh-Saberi](https://github.com/Mh-Saberi) |
+|  | **علیرضا شیخ‌احمدی** || [@Alirezasha1](https://github.com/Alirezasha1) |
+|  | **سید محمد عنبری** || [@Smohammad-anbari](https://github.com/mmd-anbari) |
+|  | **شاهین زمانی** | | [@shahinzam101](https://github.com/shahinzam101) |
