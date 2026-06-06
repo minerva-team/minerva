@@ -4,11 +4,11 @@
   
   <h1>Minerva (مینروا)</h1>
   <p><b>سامانه هوشمند و یکپارچه مدیریت مالی و منابع انسانی (HRM & ERP)</b></p>
+  <p>پروژه پایانی درس مهندسی نرم‌افزار ۲ - دانشگاه ارومیه</p>
 
   <br />
 
-  <img src="https://img.shields.io/badge/Frontend-Next.js_14-black?style=for-the-badge&logo=next.dotjs" alt="Next.js" />
-  <img src="https://img.shields.io/badge/UI_Library-React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Frontend-React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
   <img src="https://img.shields.io/badge/Backend-Django_DRF-092E20?style=for-the-badge&logo=django" alt="Django" />
   <img src="https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/DevOps-Docker-2496ED?style=for-the-badge&logo=docker" alt="Docker" />
