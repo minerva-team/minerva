@@ -50,7 +50,7 @@ minerva/
 
 | پروفایل | نام و نام‌خانوادگی | نقش در پروژه | اکانت گیت‌هاب |
 | --- | --- | --- | --- |
-|  | **سجر پورجعفر** |  | [@saharp51022-creator](https://github.com/saharp51022-creator) |
+|  | **سحر پورجعفر** |  | [@saharp51022-creator](https://github.com/saharp51022-creator) |
 |  | **آویسا فیضی** | | [@Avisaoops](https://github.com/Avisaoops) |
 |  | **مهتاب صابری** | | [@Mh-Saberi](https://github.com/Mh-Saberi) |
 |  | **علیرضا شیخ‌احمدی** || [@Alirezasha1](https://github.com/Alirezasha1) |
