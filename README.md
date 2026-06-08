@@ -54,5 +54,5 @@ minerva/
 |  | **آویسا فیضی** | | [@Avisaoops](https://github.com/Avisaoops) |
 |  | **مهتاب صابری** | | [@Mh-Saberi](https://github.com/Mh-Saberi) |
 |  | **علیرضا شیخ‌احمدی** || [@Alirezasha1](https://github.com/Alirezasha1) |
-|  | **سید محمد عنبری** || [@Smohammad-anbari](https://github.com/mmd-anbari) |
+|  | **سید محمد عنبری** || [@mmd-anbari](https://github.com/mmd-anbari) |
 |  | **شاهین زمانی** | | [@shahinzam101](https://github.com/shahinzam101) |
