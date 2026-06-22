@@ -9,3 +9,8 @@ class CustomUserAdmin(UserAdmin):
     ordering = ['-created_at']
     list_filter = ['role', 'is_active']
     
+@admin.register(OTPVerification)
+class OTPVerificationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'purpose', 'is_used', 'expires_at']
+    search_fields = ['user__email']
+    list_filter = ['purpose', 'is_used']
