@@ -8,6 +8,20 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ['email', 'phone_number']
     ordering = ['-created_at']
     list_filter = ['role', 'is_active']
+
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'phone_number', 'role')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+    )
+
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'phone_number', 'role', 'password')}
+        ),
+    )
     
 @admin.register(OTPVerification)
 class OTPVerificationAdmin(admin.ModelAdmin):
