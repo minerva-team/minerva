@@ -18,7 +18,7 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
     
     def __str__(self):
         return self.email
@@ -34,8 +34,8 @@ class OTPVerification(models.Model):
     purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
     
     is_used = models.BooleanField(default=False)
-    expires_at = models.DateField()
-    created_at = models.DateField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.user.email} - {self.purpose}"
