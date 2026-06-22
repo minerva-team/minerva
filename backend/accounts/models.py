@@ -10,7 +10,7 @@ class User(AbstractUser):
         ('Admin', 'Admin'),
         ('HR Manager', 'HR Manager'),
         ('Finance Manager', 'Finance Manager'),
-        ('Employee', 'Employee')
+        ('Employee', 'Employee'),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     
@@ -22,3 +22,20 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
+
+class OTPVerification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    
+    PURPOSE_CHOICES = [
+        ('login', 'Login'),
+        ('reset_password', 'Reset Password'),
+    ]
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
+    
+    is_used = models.BooleanField(default=False)
+    expires_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.purpose}"
