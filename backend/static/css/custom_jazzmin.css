@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --minerva-primary: #512988;
+    --minerva-dark: #2d1550;
+    --minerva-light: #7a3fc4;
+}
+
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+    background: #1a1a2e !important;
+}
+
+.navbar-dark {
+    background: linear-gradient(135deg, var(--minerva-primary) 0%, var(--minerva-dark) 100%) !important;
+    box-shadow: 0 2px 10px rgba(81, 41, 136, 0.3);
+}
+
+.brand-link {
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-dark-purple {
+    background: #16213e !important;
+}
+
+.nav-sidebar .nav-link.active {
+    background: var(--minerva-primary) !important;
+    box-shadow: 0 2px 8px rgba(81, 41, 136, 0.4);
+}
+
+.content-wrapper {
+    background: #0f1419 !important;
+}
+
+.card {
+    background: #1e1e2e !important;
+    border: 1px solid rgba(81, 41, 136, 0.2) !important;
+}
+
+.btn-primary {
+    background: var(--minerva-primary) !important;
+    border-color: var(--minerva-primary) !important;
+}
+
+.btn-primary:hover {
+    background: var(--minerva-light) !important;
+    border-color: var(--minerva-light) !important;
+}
