@@ -1,6 +1,6 @@
 from django.db import models
 from accounts.models import User
-
+from .manager import ActiveEmployeeManager
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -9,7 +9,6 @@ class Department(models.Model):
     
     def __str__(self):
         return self.name
-    
     
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
@@ -22,6 +21,8 @@ class Employee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at =models.DateTimeField(auto_now_add=True)
     
+    objects = models.Manager()
+    active_employees = ActiveEmployeeManager()
     
     def __str__(self):
         return self.employee_code
