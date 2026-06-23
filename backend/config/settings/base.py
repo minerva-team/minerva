@@ -159,7 +159,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "Minerva Admin",
     "site_header": "Minerva System",
     "site_brand": "Minerva",
-    "site_logo": None,  
+    "site_logo": "img/logo.png",  
     "site_logo_classes": "img-circle",
     "site_icon": None,
     "welcome_sign": "System Administration Panel",
