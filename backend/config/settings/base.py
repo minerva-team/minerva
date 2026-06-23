@@ -161,7 +161,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Minerva",
     "site_logo": "img/logo.png",  
     "site_logo_classes": "img-circle",
-    "site_icon": None,
+    "site_icon": "img/logo.png",
     "welcome_sign": "System Administration Panel",
     "copyright": "Minerva © 2026",
     "search_model": ["accounts.User"],
@@ -169,6 +169,7 @@ JAZZMIN_SETTINGS = {
     
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "/", "new_window": True},
         {"name": "Support", "url": "/support/", "new_window": True},
     ],
     
@@ -180,6 +181,7 @@ JAZZMIN_SETTINGS = {
         "accounts.user": "fas fa-users",
         "accounts.otpverification": "fas fa-key",
         "auth.Group": "fas fa-users-cog",
+        "hr.employee": "fas fa-id-badge",
     },
     
     "default_icon_parents": "fas fa-chevron-circle-right",
@@ -193,7 +195,7 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
-    "order_with_respect_to": ["accounts"],
+    "order_with_respect_to": ["accounts", "hr"],
     
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {

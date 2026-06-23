@@ -4,6 +4,8 @@
     --minerva-primary: #512988;
     --minerva-dark: #2d1550;
     --minerva-light: #7a3fc4;
+    --minerva-bg: #1a1a2e;
+    --minerva-card: #1e1e2e;
 }
 
 * {
@@ -11,7 +13,7 @@
 }
 
 body {
-    background: #1a1a2e !important;
+    background: var(--minerva-bg) !important;
 }
 
 .navbar-dark {
@@ -22,15 +24,21 @@ body {
 .brand-link {
     font-weight: 600 !important;
     letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
 }
 
 .sidebar-dark-purple {
     background: #16213e !important;
 }
 
+.nav-sidebar .nav-link {
+    transition: all 0.3s ease !important; /* انیمیشن نرم منوها */
+}
+
 .nav-sidebar .nav-link.active {
     background: var(--minerva-primary) !important;
     box-shadow: 0 2px 8px rgba(81, 41, 136, 0.4);
+    border-radius: 6px;
 }
 
 .content-wrapper {
@@ -38,8 +46,27 @@ body {
 }
 
 .card {
-    background: #1e1e2e !important;
+    background: var(--minerva-card) !important;
     border: 1px solid rgba(81, 41, 136, 0.2) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(122, 63, 196, 0.15) !important; 
+}
+
+.btn {
+    transition: all 0.3s ease-in-out !important;
+    border-radius: 6px !important;
 }
 
 .btn-primary {
@@ -50,4 +77,28 @@ body {
 .btn-primary:hover {
     background: var(--minerva-light) !important;
     border-color: var(--minerva-light) !important;
+    transform: translateY(-1px); /* افکت بالا آمدن دکمه */
+    box-shadow: 0 4px 12px rgba(122, 63, 196, 0.3);
+}
+
+.form-control:focus {
+    border-color: var(--minerva-light) !important;
+    box-shadow: 0 0 0 0.2rem rgba(122, 63, 196, 0.25) !important;
+    background-color: #2a2a3c !important;
+    color: #fff !important;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--minerva-bg); 
+}
+::-webkit-scrollbar-thumb {
+    background: var(--minerva-primary); 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--minerva-light); 
 }
