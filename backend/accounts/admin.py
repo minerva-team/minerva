@@ -8,12 +8,13 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ['email', 'phone_number']
     ordering = ['-created_at']
     list_filter = ['role', 'is_active']
-
+    readonly_fields = ['last_login', 'date_joined', 'created_at', 'updated_at']
+    
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'phone_number', 'role')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+        ('Important Dates', {'fields': ('last_login', 'date_joined', 'created_at', 'updated_at')}),
     )
 
     add_fieldsets = (
