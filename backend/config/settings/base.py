@@ -5,7 +5,7 @@ Environment-specific values are loaded from the environment (.env in dev).
 
 import os
 from pathlib import Path
-
+from datetime import timedelta
 from dotenv import load_dotenv
 
 # config/settings/base.py -> parents[2] == backend/
@@ -144,7 +144,6 @@ STATICFILES_DIRS = [
 ]
 # --- DRF / Spectacular ------------------------------------------------------
 
-from datetime import timedelta
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
