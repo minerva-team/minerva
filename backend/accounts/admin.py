@@ -1,9 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import User, OTPVerification
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('email', 'phone_number', 'role')
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = ('email', 'phone_number', 'role')
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    add_form = CustomUserCreationForm
+    form = CustomUserChangeForm
+
     list_display = ['email', 'role', 'is_active', 'created_at']
     search_fields = ['email', 'phone_number']
     ordering = ['-created_at']
@@ -20,7 +34,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'phone_number', 'role', 'password')}
+            'fields': ('email', 'phone_number', 'role', 'password1', 'password2')}
         ),
     )
     
