@@ -67,7 +67,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
-    "'corsheaders.middleware.CorsMiddleware',"
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -144,6 +144,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+# ==========================================
+# CORS Settings
+# ==========================================
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 # --- DRF / Spectacular ------------------------------------------------------
 
 
@@ -162,7 +171,7 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Minerva API",
-    "DESCRIPTION": "HR & Finance ERP",
+    "DESCRIPTION": "API documentation for Minerva Integrated Enterprise System",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
