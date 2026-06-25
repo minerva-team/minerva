@@ -43,8 +43,6 @@ class Employee(BaseModel):
         verbose_name = "Employee"
         verbose_name_plural = "Employees"
         indexes = [
-            models.Index(fields=['employee_code']),
-            models.Index(fields=['national_id']),
             models.Index(fields=['is_deleted']), 
         ]
 
