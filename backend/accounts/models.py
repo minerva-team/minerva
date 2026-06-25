@@ -24,6 +24,15 @@ class User(AbstractUser):
     
     objects = UserManager()
 
+    class Meta: 
+        ordering = ['-created_at']
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['phone_number']),
+        ]
+
     def __str__(self):
         return self.email
 
@@ -40,6 +49,14 @@ class OTPVerification(models.Model):
     is_used = models.BooleanField(default=False)
     expires_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta: 
+        ordering = ['-created_at']
+        verbose_name = 'OTP Verification'
+        verbose_name_plural = 'OTP Verifications'
+        indexes = [
+            models.Index(fields=['user', 'purpose', 'is_used']),
+        ]
     
     def __str__(self):
         return f"{self.user.email} - {self.purpose}"
