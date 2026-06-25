@@ -56,3 +56,30 @@ class Contract(models.Model):
         
     def __str__(self):
         return f"{self.employee} - {self.contract_type}"
+    
+    
+class Attendance(models.Model):
+    STATUS_CHOICES = [
+        ('Present', 'Present'),
+        ('Absent', 'Absent'),
+        ('On Leave', 'On Leave'),
+    ]
+    
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
+    date = models.DateField()
+    clock_in = models.TimeField(null=True, blank=True)
+    clock_out = models.TimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["employee", "date"],
+                name="unique_daily_attendance",
+            )
+        ]
+        
+    def __str__(self):
+        return f"{self.employee} - {self.date}"
+        
