@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse # type: ignore
 from hr.models import Department, Employee, Contract, Attendance, LeaveType, LeaveRequest
 from .permissions import IsHRManagerRole
 from . import serializers
