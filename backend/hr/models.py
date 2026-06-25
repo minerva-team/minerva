@@ -112,7 +112,7 @@ class LeaveRequest(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(end_date__gte=models.F('start_date')),
+                condition=models.Q(end_date__gte=models.F('start_date')),
                 name="check_leave_end_date_after_start_date"
             )
         ]
