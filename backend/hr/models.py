@@ -83,3 +83,10 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.employee} - {self.date}"
         
+        
+class LeaveType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    is_paid = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name
