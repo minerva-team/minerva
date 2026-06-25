@@ -90,3 +90,32 @@ class LeaveType(models.Model):
     
     def __str__(self):
         return self.name
+    
+
+class LeaveRequest(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
+    
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name='leave_requests')
+    leave_type = models.ForeignKey(LeaveType, on_delete=models.PROTECT)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
+    reason = models.TextField(null=True, blank=True)
+    approved_by = models.ForeignKey(Employee, on_delete=models.PROTECT, null=True, blank=True, related_name='approved_leaves')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(end_date__gte=models.F('start_date')),
+                name="check_leave_end_date_after_start_date"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.employee} - {self.leave_type} - {self.status}"
