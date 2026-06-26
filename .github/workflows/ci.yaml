@@ -14,14 +14,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build
-        run: docker compose -f docker-compose.ci.yml build
+        run: docker compose -f docker-compose.yml build
 
       - name: Run migrations
-        run: docker compose -f docker-compose.ci.yml run --rm web python manage.py migrate
+        run: docker compose -f docker-compose.yml run --rm web python manage.py migrate
 
       - name: Run tests
-        run: docker compose -f docker-compose.ci.yml run --rm web python manage.py test
+        run: docker compose -f docker-compose.yml run --rm web python manage.py test
 
       - name: Cleanup
         if: always()
-        run: docker compose -f docker-compose.ci.yml down -v
+        run: docker compose -f docker-compose.yml down -v
