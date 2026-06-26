@@ -11,17 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build
-        run: docker compose -f docker-compose.yml build
+      - name: Build services
+        run: docker compose build
 
       - name: Run migrations
-        run: docker compose -f docker-compose.yml run --rm web python manage.py migrate
+        run: docker compose run --rm web python manage.py migrate
 
       - name: Run tests
-        run: docker compose -f docker-compose.yml run --rm web python manage.py test
+        run: docker compose run --rm web python manage.py test
 
       - name: Cleanup
         if: always()
-        run: docker compose -f docker-compose.yml down -v
+        run: docker compose down -v
