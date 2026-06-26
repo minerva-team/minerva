@@ -32,6 +32,16 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("This email is already registered.")
         return value
+    
+    def validate_employee_code(self, value):
+        if Employee.objects.filter(employee_code=value).exists():
+            raise serializers.ValidationError("This employee code is already in use.")
+        return value
+
+    def validate_national_id(self, value):
+        if Employee.objects.filter(national_id=value).exists():
+            raise serializers.ValidationError("This national ID is already registered.")
+        return value
 
     def create(self, validated_data):
         with transaction.atomic():

@@ -93,7 +93,13 @@ class LeaveTypeViewSet(HRBaseViewSet):
     )
 )
 class LeaveRequestViewSet(HRBaseViewSet):
-    queryset = LeaveRequest.objects.select_related('employee', 'employee__user', 'leave_type', 'approved_by').all()
+    queryset = LeaveRequest.objects.select_related(
+        'employee',
+        'employee__user', 
+        'leave_type',
+        'approved_by',
+        'approved_by__user'
+        ).all()
     serializer_class = serializers.LeaveRequestSerializer
     filterset_fields = ['employee', 'status', 'leave_type']
     ordering_fields = ['start_date', 'created_at']
