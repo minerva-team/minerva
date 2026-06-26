@@ -1,4 +1,3 @@
-from attr import attrs
 from rest_framework import serializers
 from django.db import transaction
 from accounts.models import User
