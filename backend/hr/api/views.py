@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse # type: ignore
 
 from hr.models import Department, Employee, Contract, Attendance, LeaveType, LeaveRequest
@@ -84,6 +84,8 @@ class LeaveTypeViewSet(HRBaseViewSet):
     serializer_class = serializers.LeaveTypeSerializer
     filterset_fields = ['is_paid']
     search_fields = ['name']
+     
+    pagination_class = None  # Disable pagination for LeaveType
 
 
 @extend_schema_view(
