@@ -1,3 +1,4 @@
+from attr import attrs
 from rest_framework import serializers
 from django.db import transaction
 from accounts.models import User
@@ -57,10 +58,15 @@ class ContractSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, attrs):
-        is_active = attrs.get('is_active', True)
-        employee = attrs.get('employee')
+        employee = attrs.get('employee', self.instance.employee if self.instance else None)
+        is_active = attrs.get('is_active', self.instance.is_active if self.instance else True)
         
-        if is_active and Contract.objects.filter(employee=employee, is_active=True).exists():
+        queryset = Contract.objects.filter(employee=employee, is_active=True)
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if is_active and queryset.exists():
             raise serializers.ValidationError({
                 "is_active": "An active contract already exists for this employee. Deactivate it first."
             })
@@ -85,12 +91,15 @@ class LeaveTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LeaveRequestSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = LeaveRequest
         fields = '__all__'
 
     def validate(self, attrs):
-        if attrs['end_date'] < attrs['start_date']:
+        start_date = attrs.get("start_date", self.instance.start_date if self.instance else None)
+        end_date = attrs.get("end_date", self.instance.end_date if self.instance else None)
+        if start_date and end_date and end_date < start_date:
             raise serializers.ValidationError({
                 "end_date": "End date cannot be before start date."
             })
