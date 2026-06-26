@@ -11,13 +11,15 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class EmployeeListSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
+    phone_number = serializers.CharField(source='user.phone_number', read_only=True)
     
     class Meta:
         model = Employee
-        fields = ['id', 'email', 'employee_code', 'national_id', 'department', 'department_name', 'hire_date', 'is_deleted']
+        fields = ['id', 'email','phone_number' ,'employee_code', 'national_id', 'department', 'department_name', 'hire_date', 'is_deleted']
 
 class EmployeeRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    phone_number = serializers.CharField(max_length=15)
     first_name = serializers.CharField(max_length=50)
     last_name = serializers.CharField(max_length=50)
     password = serializers.CharField(write_only=True, min_length=8)
@@ -31,6 +33,11 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("This email is already registered.")
+        return value
+    
+    def validate_phone_number(self, value):
+        if User.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("This phone number is already registered.")
         return value
     
     def validate_employee_code(self, value):
@@ -47,6 +54,7 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
         with transaction.atomic():
             user = User.objects.create_user(
                 email=validated_data['email'],
+                phone_number=validated_data['phone_number'],
                 password=validated_data['password'],
                 first_name=validated_data['first_name'],
                 last_name=validated_data['last_name'],
