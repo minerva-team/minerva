@@ -99,8 +99,10 @@ class LeaveTypeSerializer(serializers.ModelSerializer):
         model = LeaveType
         fields = '__all__'
 
-class LeaveRequestSerializer(serializers.ModelSerializer):
-
+class LeaveRequestHRSerializer(serializers.ModelSerializer):
+    """
+        Only for HRmanager
+    """
     class Meta:
         model = LeaveRequest
         fields = '__all__'
@@ -113,3 +115,11 @@ class LeaveRequestSerializer(serializers.ModelSerializer):
                 "end_date": "End date cannot be before start date."
             })
         return attrs
+
+
+class LeaveRequestEmployeeSerializer(LeaveRequestHRSerializer):
+    """
+        For employees
+    """
+    class Meta(LeaveRequestHRSerializer.Meta):
+        read_only_fields = ['status', 'approved_by']

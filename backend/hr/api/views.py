@@ -2,6 +2,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse # type: ignore
+from rest_framework.permissions import IsAuthenticated
 
 from hr.models import Department, Employee, Contract, Attendance, LeaveType, LeaveRequest
 from .permissions import IsHRManagerRole
@@ -73,11 +74,36 @@ class ContractViewSet(HRBaseViewSet):
     )
 )
 class AttendanceViewSet(HRBaseViewSet):
-    queryset = Attendance.objects.select_related('employee', 'employee__user').all()
+    """
+    Handles CRUD operations for Attendance.
+    Employees can only view their own attendance records. HR has full access.
+    """
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.AttendanceSerializer
-    filterset_fields = ['employee', 'status', 'date']
+    filterset_fields = ['status', 'date']
     ordering_fields = ['date']
 
+    def get_queryset(self):
+        """
+        Filters attendance data. HR sees all, employees see only their own.
+        """
+        user = self.request.user
+        queryset = Attendance.objects.select_related('employee', 'employee__user').all()
+        
+        if user.role in ['HR Manager', 'Admin']:
+            return queryset
+            
+        return queryset.filter(employee__user=user)
+        
+    def perform_create(self, serializer):
+        """
+        Ensures employees can only log attendance for themselves.
+        """
+        user = self.request.user
+        if user.role == 'Employee':
+            serializer.save(employee=user.employee_profile)
+        else:
+            serializer.save()
 
 class LeaveTypeViewSet(HRBaseViewSet):
     queryset = LeaveType.objects.all()
@@ -94,14 +120,53 @@ class LeaveTypeViewSet(HRBaseViewSet):
         description="Statuses include Pending, Approved, Rejected. System checks that end date is not before start date."
     )
 )
+
+
 class LeaveRequestViewSet(HRBaseViewSet):
-    queryset = LeaveRequest.objects.select_related(
-        'employee',
-        'employee__user', 
-        'leave_type',
-        'approved_by',
-        'approved_by__user'
-        ).all()
-    serializer_class = serializers.LeaveRequestSerializer
-    filterset_fields = ['employee', 'status', 'leave_type']
+    """
+    Handles CRUD operations for Leave Requests.
+    Implements role-based access control (RBAC) to ensure employees 
+    can only view and create their own requests, while HR has full access.
+    """
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['status', 'leave_type']
     ordering_fields = ['start_date', 'created_at']
+
+    def get_queryset(self):
+        """
+        Filters the dataset based on the user's role.
+        HR/Admins see all records. Employees see only their own.
+        """
+        user = self.request.user
+        
+        queryset = LeaveRequest.objects.select_related(
+            'employee', 'employee__user', 'leave_type', 'approved_by', 'approved_by__user'
+        ).all()
+        
+        if user.role in ['HR Manager', 'Admin']:
+            return queryset
+            
+        return queryset.filter(employee__user=user)
+        
+    def perform_create(self, serializer):
+        """
+        Overrides the default save method to inject the employee instance.
+        Prevents regular employees from submitting leaves for other colleagues.
+        """
+        user = self.request.user
+        
+        if user.role == 'Employee':
+            serializer.save(employee=user.employee_profile)
+        else:
+            serializer.save()
+
+    def get_serializer_class(self):
+        """
+        Dynamically assigns a serializer based on the user's role.
+        Employees get a restricted form, HR gets full access.
+        """
+        if self.request.user and self.request.user.is_authenticated:
+            if self.request.user.role in ['HR Manager', 'Admin']:
+                return serializers.LeaveRequestHRSerializer
+                
+        return serializers.LeaveRequestEmployeeSerializer
