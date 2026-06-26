@@ -1,5 +1,5 @@
 """Development settings."""
-
+import sys
 from .base import *  # noqa: F401,F403
 from .base import BASE_DIR, INSTALLED_APPS, MIDDLEWARE, env_bool  # noqa: F401
 
@@ -16,8 +16,9 @@ if not env_bool("USE_POSTGRES", False):
     }
 
 # django-debug-toolbar
-INSTALLED_APPS = INSTALLED_APPS + ["debug_toolbar"]
-MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
+if DEBUG and "test" not in sys.argv:
+    INSTALLED_APPS = INSTALLED_APPS + ["debug_toolbar"]
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Schema UI is exposed only in dev.
