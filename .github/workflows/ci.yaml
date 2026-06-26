@@ -1,0 +1,27 @@
+name: Django CI with Docker
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: docker compose -f docker-compose.ci.yml build
+
+      - name: Run migrations
+        run: docker compose -f docker-compose.ci.yml run --rm web python manage.py migrate
+
+      - name: Run tests
+        run: docker compose -f docker-compose.ci.yml run --rm web python manage.py test
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v
