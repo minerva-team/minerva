@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.core.exceptions import ValidationError
 
 class PayrollConfig(models.Model):
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2)
@@ -17,3 +17,27 @@ class PayrollConfig(models.Model):
 
     def __str__(self):
         return "Payroll Configuration"
+    
+    
+class Payslip(models.Model):
+    employee = models.ForeignKey('hr.Employee', on_delete=models.PROTECT)
+    year = models.PositiveIntegerField()
+    month = models.PositiveSmallIntegerField()
+    gross_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    applied_tax_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    applied_insurance_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    insurance_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    net_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["employee", "year", "month"],
+                name="unique_payslip_per_period",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.employee.user.email} - {self.year}/{self.month}"
