@@ -1,4 +1,5 @@
 from django.db import models
+from hr.models import Employee
 
 class PayrollConfig(models.Model):
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2)
@@ -19,7 +20,14 @@ class PayrollConfig(models.Model):
     
     
 class Payslip(models.Model):
-    employee = models.ForeignKey('hr.Employee', on_delete=models.PROTECT)
+    STATUS_CHOICES = [
+        ('Draft', 'Draft'),
+        ('Approved', 'Approved'),
+        ('Paid', 'Paid'),
+    ]
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='Draft')
+    
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
     year = models.PositiveIntegerField()
     month = models.PositiveSmallIntegerField()
     gross_salary = models.DecimalField(max_digits=12, decimal_places=2)
