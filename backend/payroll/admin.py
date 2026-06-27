@@ -7,7 +7,6 @@ from .models import PayrollConfig, Payslip
 class PayrollConfigAdmin(admin.ModelAdmin):
     list_display = ['tax_rate', 'insurance_rate', 'overtime_multiplier', 'updated_at']
 
-    # فقط اجازه ساخت اگر هنوز چیزی وجود ندارد
     def has_add_permission(self, request):
         return not PayrollConfig.objects.exists()
 
