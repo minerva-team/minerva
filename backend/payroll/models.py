@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 class PayrollConfig(models.Model):
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2)
