@@ -49,13 +49,7 @@ class Transaction(BaseModel):
         verbose_name_plural = "Transactions"
         ordering = ['-date', '-id']
         
-        constraints = [
-            models.CheckConstraint(
-                condition=models.Q(amount__gt=0),
-                name="check_transaction_positive_amount"
-            )
-        ]
-        
+
         indexes = [
             models.Index(fields=['date']),
             models.Index(fields=['category', 'date']),
