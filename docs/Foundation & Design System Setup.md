@@ -7,7 +7,6 @@ This document is the absolute source of truth for the Minerva React application.
 * **Styling Engine:** Tailwind CSS
 * **UI Components:** shadcn/ui + Radix UI
 * **Form State & Validation:** React Hook Form + Zod
-* **Icons:** Lucide React
 
 ---
 
@@ -16,7 +15,7 @@ We strictly adhere to an 8px base grid. No arbitrary margin or padding values ar
 
 | Element / Context | Pixel Value | Tailwind Class | Usage Scenario |
 | :--- | :--- | :--- | :--- |
-| **Micro-Spacing** | 4px | `p-1`, `m-1` | Between an icon and its text label. |
+| **Micro-Spacing** | 4px | `p-1`, `m-1` | Between a small element and its text label. |
 | **Component Internal** | 8px | `p-2`, `m-2` | Padding inside small buttons or input fields. |
 | **Standard Spacing** | 16px | `p-4`, `m-4` | Padding inside standard cards, distance between form fields. |
 | **Section Gap** | 24px | `gap-6`, `p-6` | Distance between major sections inside a single view. |
@@ -25,16 +24,16 @@ We strictly adhere to an 8px base grid. No arbitrary margin or padding values ar
 
 ---
 
-## 3. Typography & Color Matrix
+## 3. Typography & Color Matrix (Dark Theme)
 Our UI relies on white space and typography rather than borders. 
 
 | Token | Value / Setup | Application |
 | :--- | :--- | :--- |
 | **Primary Accent** | `#512988` | Main action buttons, active states, focus rings, primary links. |
-| **Background** | `#FBFBFD` | Global page background (Apple's signature off-white). |
-| **Surface** | `#FFFFFF` | Cards, modals, and input backgrounds. |
-| **Text Primary** | `#1D1D1F` | Main headings and body text. |
-| **Text Muted** | `#86868B` | Helper texts, placeholders, and disabled states. |
+| **Background** | `#000000` | Global page background (Completely dark). |
+| **Surface** | `#121212` | Cards, modals, and input backgrounds. |
+| **Text Primary** | `#FFFFFF` | Main headings and body text. |
+| **Text Muted** | `#A1A1AA` | Helper texts, placeholders, and disabled states. |
 | **Border Radius** | `12px` (`rounded-xl`)| Universal radius for all cards and primary buttons to ensure a soft feel. |
 
 ---
@@ -53,7 +52,7 @@ All interactive elements must feel tactile and responsive without being slow.
 | :--- | :--- | :--- |
 | **Button Hover** | Very subtle opacity drop or slight shadow increase. | `hover:opacity-90 transition-opacity duration-200` |
 | **Button Click** | Elastic scale-down effect (feels like pressing physical hardware). | `active:scale-[0.98] transition-transform duration-150` |
-| **Input Focus** | Smooth appearance of a `#512988` focus ring without moving layout. | `focus:ring-2 focus:ring-[#512988] focus:outline-none` |
+| **Input Focus** | Smooth appearance of a `#512988` focus ring without moving layout. | `focus:ring-2 focus:ring-[#512988] focus:ring-offset-2 focus:ring-offset-black focus:outline-none` |
 
 ---
 
