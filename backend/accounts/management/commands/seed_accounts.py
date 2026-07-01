@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 email=email,
                 password="password123",
                 role=random.choice(roles),
-                phone_number=fake.unique.msisdn()[:15],
+                phone_number=fake.unique.msisdn()[:11],
             )
 
             users.append(user)
