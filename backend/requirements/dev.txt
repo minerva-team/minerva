@@ -5,3 +5,4 @@ pytest-django==4.8.0
 pytest-sugar
 pytest-clarity
 pytest-html
+Faker
