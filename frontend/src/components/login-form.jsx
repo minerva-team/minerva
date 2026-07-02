@@ -1,58 +1,65 @@
-import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export function LoginForm({ className, ...props }) {
-  // استفاده از useState به شکل صحیح
-  const [step, setStep] = useState(1); 
-  const [email, setEmail] = useState("");
-
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          {/* فرم اصلی */}
-          <form className="p-6 md:p-8" onSubmit={(e) => e.preventDefault()}>
-            {step === 1 ? (
-               // محتوای مرحله اول (ایمیل)
-               <div className="grid gap-4">
-                 <div className="grid gap-2">
-                   <Label htmlFor="email">ایمیل</Label>
-                   <Input 
-                     id="email" 
-                     type="email"
-                     placeholder="m@example.com"
-                     value={email} 
-                     onChange={(e) => setEmail(e.target.value)} 
-                   />
-                 </div>
-                 <Button className="bg-zinc-900 text-white" onClick={() => setStep(2)}>ادامه</Button>
-               </div>
-            ) : (
-               // محتوای مرحله دوم (رمز یا کد)
-               <div className="grid gap-4">
-                 <div className="grid gap-2">
-                   <Label htmlFor="password">رمز عبور</Label>
-                   <Input id="password" type="password" />
-                 </div>
-                 <Button onClick={() => setStep(1)} variant="outline">بازگشت</Button>
-               </div>
-            )}
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <a
+                    href="#"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input id="password" type="password" required />
+              </div>
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+              <Button variant="outline" className="w-full">
+                Login with Google
+              </Button>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?{' '}
+              <a href="#" className="underline underline-offset-4">
+                Sign up
+              </a>
+            </div>
           </form>
-          
-          {/* بخش عکس سمت راست */}
-          <div className="relative hidden bg-muted md:block">
-            <img
-              src="/login.jpg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover object-center dark:brightness-[0.2] dark:grayscale" 
-            />
-          </div>
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

@@ -16,10 +16,10 @@ export default {
           800: "#24123D",
           900: "#180C29",
         },
-        backgroundC: "#FBFBFD",
-        surfaceC: "#FFFFFF",
-        TextC: "#1D1D1F",
-        mutedTextC: "#86868B"
+        backgroundC: "#000000",
+        surfaceC: "#121212",
+        matnC: "#FFFFFF",
+        mutedMatnC: "#A1A1AA"
       },
       fontFamily: {
         sans: ['Vazirmatn', 'sans-serif'],
