@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Login({ className, ...props }) {
+  useEffect(() => {
+    document.title = 'مینروا | ورود'
+  }, [])
   const navigate = useNavigate()
   const token = localStorage.getItem('access')
 
@@ -43,7 +46,7 @@ export default function Login({ className, ...props }) {
       className={cn(className, 'min-h-screen flex flex-col items-center justify-center bg-backgroundC')}
       {...props}
     >
-      <Card className="w-full max-w-[320px] bg-surfaceC border-mutedMatnC/50">
+      <Card className="w-full max-w-[400px] bg-surfaceC border-mutedMatnC/50">
         <CardHeader className="flex flex-col items-center text-center">
           <div className="w-20 h-20 flex items-center justify-center">
             <img src="/minervaLogo3.svg" alt="لوگوی مینروا" />
