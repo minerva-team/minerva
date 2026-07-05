@@ -1,49 +1,78 @@
-import { cn } from '@/lib/utils'
-import { useState, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { requestOtp, verifyOtp } from "@/api/auth";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { motion, AnimatePresence } from 'framer-motion'
+} from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Login({ className, ...props }) {
   useEffect(() => {
-    document.title = 'مینروا | ورود'
-  }, [])
-  const navigate = useNavigate()
-  const token = localStorage.getItem('access')
+    document.title = "مینروا | ورود";
+  }, []);
 
-  const [step, setStep] = useState(1)
-  const [identifier, setIdentifier] = useState('')
-  const [otp, setOtp] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const token = localStorage.getItem("access");
 
-  if (token) return <Navigate to="/dashboard" replace />
+  const [step, setStep] = useState(1);
+  const [identifier, setIdentifier] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  if (token) return <Navigate to="/dashboard" replace />;
 
   const handleRequestCode = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 200))
-    setIsLoading(false)
-    if (identifier) setStep(2)
-  }
+    e.preventDefault();
 
-  const handleVerifyOtp = (e) => {
-    e.preventDefault()
-    localStorage.setItem('access', 'fake-token')
-    navigate('/dashboard')
-  }
+    setError("");
+    setIsLoading(true);
+
+    try {
+      await requestOtp(identifier);
+      setStep(2);
+      setOtp("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const data = await verifyOtp(identifier, otp);
+
+      localStorage.setItem("access", data.tokens.access);
+      localStorage.setItem("refresh", data.tokens.refresh);
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
       dir="rtl"
-      className={cn(className, 'min-h-screen flex flex-col items-center justify-center bg-backgroundC')}
+      className={cn(
+        className,
+        "min-h-screen flex flex-col items-center justify-center bg-backgroundC"
+      )}
       {...props}
     >
       <Card className="w-full max-w-[400px] bg-surfaceC border-mutedMatnC/50">
@@ -51,11 +80,15 @@ export default function Login({ className, ...props }) {
           <div className="w-20 h-20 flex items-center justify-center">
             <img src="/minervaLogo3.svg" alt="لوگوی مینروا" />
           </div>
+
           <CardTitle className="text-matnC text-2xl font-semibold">
-            {step === 1 ? 'ورود به مینروا' : 'رمز عبور را وارد کنید'}
+            {step === 1 ? "ورود به مینروا" : "رمز عبور را وارد کنید"}
           </CardTitle>
+
           <CardDescription className="text-mutedMatnC">
-            {step === 1 ? 'برای ادامه آدرس ایمیل خود را وارد کنید' : 'رمز عبور به ایمیل شما ارسال شد'}
+            {step === 1
+              ? "برای ادامه آدرس ایمیل خود را وارد کنید"
+              : "رمز عبور به ایمیل شما ارسال شد"}
           </CardDescription>
         </CardHeader>
 
@@ -76,17 +109,27 @@ export default function Login({ className, ...props }) {
                   id="identifier"
                   type="email"
                   value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
+                  onChange={(e) => {
+                    setIdentifier(e.target.value);
+                    setError("");
+                  }}
                   placeholder="name@example.com"
                   className="w-full placeholder-mutedMatnC rounded-xl border-mutedMatnC/50 bg-surfaceC focus:ring-2 focus:ring-primaryC focus:ring-offset-2 focus:ring-offset-black focus:outline-none text-matnC text-sm text-center"
                   required
                 />
+
+                {error && (
+                  <p className="text-center text-sm text-red-500">
+                    {error}
+                  </p>
+                )}
+
                 <Button
                   type="submit"
                   disabled={isLoading}
                   className="w-full bg-primaryC text-matnC rounded-xl text-sm font-medium transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 >
-                  {isLoading ? 'در حال ارسال...' : 'دریافت رمز'}
+                  {isLoading ? "در حال ارسال..." : "دریافت رمز"}
                 </Button>
               </motion.form>
             ) : (
@@ -105,21 +148,37 @@ export default function Login({ className, ...props }) {
                   maxLength={6}
                   value={otp}
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value)) setOtp(e.target.value)
+                    if (/^\d*$/.test(e.target.value)) {
+                      setOtp(e.target.value);
+                      setError("");
+                    }
                   }}
                   placeholder="••••••"
                   className="w-full text-matnC p-4 placeholder-mutedMatnC rounded-xl border border-mutedMatnC/50 bg-surfaceC focus:ring-2 focus:ring-primaryC focus:ring-offset-2 focus:ring-offset-black focus:outline-none tracking-[1em] text-center text-lg"
                   required
                 />
+
+                {error && (
+                  <p className="text-center text-sm text-red-500">
+                    {error}
+                  </p>
+                )}
+
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className="w-full bg-primaryC text-matnC rounded-xl text-sm font-medium transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                 >
-                  ورود
+                  {isLoading ? "در حال ورود..." : "ورود"}
                 </Button>
+
                 <Button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => {
+                    setStep(1);
+                    setOtp("");
+                    setError("");
+                  }}
                   className="w-full text-xs text-mutedMatnC bg-transparent border-none shadow-none hover:bg-transparent"
                 >
                   ورود با حساب دیگر
@@ -130,6 +189,5 @@ export default function Login({ className, ...props }) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
