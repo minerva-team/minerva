@@ -1,18 +1,20 @@
-import { Outlet, Link } from "react-router-dom"
+import { Outlet } from 'react-router-dom'
+
+import Sidebar from '../components/dashboard/Sidebar'
+import Header from '../components/dashboard/Header'
 
 export default function DashboardLayout() {
   return (
-    <div>
-      <h1>Dashboard Layout</h1>
+    <div className="flex min-h-screen bg-surfaceC">
+      <main className="flex flex-1 flex-col">
+        <Header />
 
-      <nav style={{ display: "flex", gap: "10px" }}>
-        <Link to="/dashboard">Home</Link>
-        <Link to="/dashboard/setting">Setting</Link>
-      </nav>
+        <div className="flex-1 overflow-auto p-8">
+          <Outlet />
+        </div>
+      </main>
 
-      <hr />
-
-      <Outlet />
+      <Sidebar />
     </div>
   )
 }

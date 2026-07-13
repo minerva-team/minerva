@@ -1,0 +1,71 @@
+import { User, Wallet, Clock3, Calendar, Settings, LogOut } from 'lucide-react'
+
+import SidebarItem from './SidebarItem'
+
+const topMenuItems = [
+  {
+    title: 'حساب کاربری',
+    to: '/dashboard/profile',
+    icon: User,
+  },
+  {
+    title: 'محاسبه حقوق',
+    to: '/dashboard/salary',
+    icon: Wallet,
+  },
+  {
+    title: 'اضافه کاری',
+    to: '/dashboard/overtime',
+    icon: Clock3,
+  },
+  {
+    title: 'مرخصی',
+    to: '/dashboard/leave',
+    icon: Calendar,
+  },
+]
+
+const bottomMenuItems = [
+  {
+    title: 'تنظیمات',
+    to: '/dashboard/settings',
+    icon: Settings,
+  },
+]
+
+export default function Sidebar() {
+  return (
+    <aside className="flex h-screen w-72 flex-col justify-between border-l border-white/10 bg-backgroundC p-6">
+      {/* بالا */}
+      <div>
+        <div className="mb-12 flex flex-row-reverse items-center justify-start gap-3 pr-4">
+          <img
+            src="/minervaLogo3.svg"
+            alt="Minerva Logo"
+            className="h-12 w-12 object-contain"
+          />
+
+          <h1 className="text-3xl font-bold text-white">مینروا</h1>
+        </div>
+
+        <nav className="space-y-3">
+          {topMenuItems.map((item) => (
+            <SidebarItem key={item.title} {...item} />
+          ))}
+        </nav>
+      </div>
+
+      {/* پایین */}
+      <div className="space-y-3">
+        {bottomMenuItems.map((item) => (
+          <SidebarItem key={item.title} {...item} />
+        ))}
+
+        <button className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-red-400 transition-all duration-200 hover:bg-red-500/20">
+          <span>خروج</span>
+          <LogOut size={20} />
+        </button>
+      </div>
+    </aside>
+  )
+}

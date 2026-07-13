@@ -30,6 +30,7 @@ export default defineConfig([
           semi: false,
           singleQuote: true,
           tabWidth: 2,
+          endOfLine: 'auto',
         },
       ],
     },
