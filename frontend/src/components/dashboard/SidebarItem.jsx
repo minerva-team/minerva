@@ -1,15 +1,15 @@
 import { NavLink } from 'react-router-dom'
 
-export default function SidebarItem({ to, icon: Icon, title }) {
+export default function SidebarItem({ to, icon: Icon, title, end = false }) {
   return (
     <NavLink
       to={to}
+      end={end}
       className={({ isActive }) =>
-        `flex items-center justify-between rounded-2xl px-4 py-4 transition-colors duration-200
-        ${
+        `flex items-center justify-between rounded-xl px-4 py-3 transition-colors duration-200 ${
           isActive
             ? 'bg-primaryC text-matnC'
-            : 'text-matnC hover:bg-primaryC/40'
+            : 'text-matnC hover:bg-primaryC/20'
         }`
       }
     >

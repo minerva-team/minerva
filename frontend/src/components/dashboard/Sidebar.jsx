@@ -4,13 +4,14 @@ import SidebarItem from './SidebarItem'
 
 const topMenuItems = [
   {
-    title: 'حساب کاربری',
-    to: '/dashboard/profile',
+    title: 'داشبورد',
+    to: '/dashboard',
     icon: User,
+    end: true,
   },
   {
-    title: 'محاسبه حقوق',
-    to: '/dashboard/salary',
+    title: 'ثبت حضور و مرخصی',
+    to: '/dashboard/attendance',
     icon: Wallet,
   },
   {
@@ -40,7 +41,7 @@ export default function Sidebar() {
       <div>
         <div className="mb-12 flex flex-row-reverse items-center justify-start gap-3 pr-4">
           <img
-            src="/minervaLogo3.svg"
+            src="/minervaLogo6-01.svg"
             alt="Minerva Logo"
             className="h-12 w-12 object-contain"
           />

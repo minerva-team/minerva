@@ -5,11 +5,11 @@ import Header from '../components/dashboard/Header'
 
 export default function DashboardLayout() {
   return (
-    <div className="flex min-h-screen bg-surfaceC">
-      <main className="flex flex-1 flex-col">
+    <div className="flex h-screen overflow-hidden bg-surfaceC">
+      <main className="flex min-w-0 flex-1 flex-col">
         <Header />
 
-        <div className="flex-1 overflow-auto p-8">
+        <div className="min-h-0 flex-1 overflow-hidden p-8">
           <Outlet />
         </div>
       </main>

@@ -3,8 +3,8 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
-import eslintPluginPrettier from 'eslint-plugin-prettier' // این را اضافه کن
-import eslintConfigPrettier from 'eslint-config-prettier' // این را اضافه کن
+import eslintPluginPrettier from 'eslint-plugin-prettier'
+import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -21,7 +21,11 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
-      parserOptions: { ecmaFeatures: { jsx: true } },
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
     },
     rules: {
       'prettier/prettier': [
@@ -31,6 +35,13 @@ export default defineConfig([
           singleQuote: true,
           tabWidth: 2,
           endOfLine: 'auto',
+        },
+      ],
+
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
         },
       ],
     },
