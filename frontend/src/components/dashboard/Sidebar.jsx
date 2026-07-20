@@ -1,4 +1,11 @@
-import { User, Wallet, Clock3, Calendar, Settings, LogOut } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Wallet,
+  Clock3,
+  Calendar,
+  Settings,
+  LogOut,
+} from 'lucide-react'
 
 import SidebarItem from './SidebarItem'
 
@@ -6,21 +13,21 @@ const topMenuItems = [
   {
     title: 'داشبورد',
     to: '/dashboard',
-    icon: User,
+    icon: LayoutDashboard,
     end: true,
   },
   {
     title: 'ثبت حضور و مرخصی',
     to: '/dashboard/attendance',
-    icon: Wallet,
-  },
-  {
-    title: 'اضافه کاری',
-    to: '/dashboard/overtime',
     icon: Clock3,
   },
   {
-    title: 'مرخصی',
+    title: 'کارت دوم',
+    to: '/dashboard/overtime',
+    icon: Wallet,
+  },
+  {
+    title: 'کارت سوم',
     to: '/dashboard/leave',
     icon: Calendar,
   },

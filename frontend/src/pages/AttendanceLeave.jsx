@@ -1,13 +1,14 @@
 export default function AttendanceLeave() {
   return (
     <div className="w-full space-y-6 text-white" dir="rtl">
-      
       {/* ================================================= */}
       {/* Attendance Section (Minimal Apple-style)          */}
       {/* ================================================= */}
       <section className="rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 sm:p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">وضعیت حضور</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            وضعیت حضور
+          </h1>
           <p className="mt-1 text-sm text-white/50">
             زمان‌های ثبت‌شده شما در سیستم برای امروز
           </p>
@@ -22,20 +23,46 @@ export default function AttendanceLeave() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500"></span>
               </span>
-              <p className="text-lg font-medium tracking-wide text-white">مشغول کار</p>
+              <p className="text-lg font-medium tracking-wide text-white">
+                مشغول کار
+              </p>
             </div>
           </div>
 
           {/* Check In */}
           <div className="rounded-2xl bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]">
-            <p className="mb-2 text-xs font-medium text-white/50">آخرین زمان ورود</p>
-            <p className="font-mono text-lg font-medium text-white">07:12</p>
+            <p className="mb-2 text-xs font-medium text-white/50">
+              آخرین زمان ورود
+            </p>
+            <input
+              type="time"
+              defaultValue="07:12"
+              className="
+    w-full rounded-lg bg-white/[0.08] px-3 py-1.5
+    font-mono text-lg font-medium text-white outline-none
+    transition-colors hover:bg-white/[0.12]
+    focus:bg-white/[0.14]
+    [color-scheme:dark]
+  "
+            />
           </div>
 
           {/* Check Out */}
           <div className="rounded-2xl bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]">
-            <p className="mb-2 text-xs font-medium text-white/50">آخرین زمان خروج</p>
-            <p className="font-mono text-lg font-medium text-white/50">13:05</p>
+            <p className="mb-2 text-xs font-medium text-white/50">
+              آخرین زمان خروج
+            </p>
+            <input
+              type="time"
+              defaultValue="13:05"
+              className="
+    w-full rounded-lg bg-white/[0.08] px-3 py-1.5
+    font-mono text-lg font-medium text-white outline-none
+    transition-colors hover:bg-white/[0.12]
+    focus:bg-white/[0.14]
+    [color-scheme:dark]
+  "
+            />
           </div>
         </div>
 
@@ -50,8 +77,8 @@ export default function AttendanceLeave() {
           </button>
           <button
             className="
-              w-full rounded-xl bg-white/[0.05] px-8 py-3.5 text-sm font-medium text-white 
-              transition-all hover:bg-white/[0.08] active:scale-95 sm:w-auto
+              w-full rounded-xl bg-primaryC px-8 py-3.5 text-sm font-medium text-white 
+              transition-all hover:opacity-90 active:scale-95 sm:w-auto
             "
           >
             ثبت خروج
@@ -64,14 +91,18 @@ export default function AttendanceLeave() {
       {/* ================================================= */}
       <section className="rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 sm:p-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">درخواست مرخصی</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            درخواست مرخصی
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
-          
           {/* Leave Type */}
           <div className="flex flex-col gap-2 md:col-span-2">
-            <label htmlFor="leave-type" className="text-xs font-medium text-white/60 pl-1">
+            <label
+              htmlFor="leave-type"
+              className="text-xs font-medium text-white/60 pl-1"
+            >
               نوع مرخصی
             </label>
             <select
@@ -90,7 +121,10 @@ export default function AttendanceLeave() {
 
           {/* Start Date */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="start-date" className="text-xs font-medium text-white/60 pl-1">
+            <label
+              htmlFor="start-date"
+              className="text-xs font-medium text-white/60 pl-1"
+            >
               تاریخ شروع
             </label>
             <input
@@ -107,7 +141,10 @@ export default function AttendanceLeave() {
 
           {/* End Date */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="end-date" className="text-xs font-medium text-white/60 pl-1">
+            <label
+              htmlFor="end-date"
+              className="text-xs font-medium text-white/60 pl-1"
+            >
               تاریخ پایان
             </label>
             <input
@@ -124,7 +161,10 @@ export default function AttendanceLeave() {
 
           {/* Description */}
           <div className="flex flex-col gap-2 md:col-span-2">
-            <label htmlFor="description" className="text-xs font-medium text-white/60 pl-1">
+            <label
+              htmlFor="description"
+              className="text-xs font-medium text-white/60 pl-1"
+            >
               توضیحات (اختیاری)
             </label>
             <textarea
@@ -150,7 +190,6 @@ export default function AttendanceLeave() {
           </button>
         </div>
       </section>
-
     </div>
   )
 }
