@@ -34,17 +34,7 @@ export default function AttendanceLeave() {
             <p className="mb-2 text-xs font-medium text-white/50">
               آخرین زمان ورود
             </p>
-            <input
-              type="time"
-              defaultValue="07:12"
-              className="
-    w-full rounded-lg bg-white/[0.08] px-3 py-1.5
-    font-mono text-lg font-medium text-white outline-none
-    transition-colors hover:bg-white/[0.12]
-    focus:bg-white/[0.14]
-    [color-scheme:dark]
-  "
-            />
+            <p className="font-mono text-lg font-medium text-white">07:12</p>
           </div>
 
           {/* Check Out */}
@@ -52,17 +42,7 @@ export default function AttendanceLeave() {
             <p className="mb-2 text-xs font-medium text-white/50">
               آخرین زمان خروج
             </p>
-            <input
-              type="time"
-              defaultValue="13:05"
-              className="
-    w-full rounded-lg bg-white/[0.08] px-3 py-1.5
-    font-mono text-lg font-medium text-white outline-none
-    transition-colors hover:bg-white/[0.12]
-    focus:bg-white/[0.14]
-    [color-scheme:dark]
-  "
-            />
+            <p className="font-mono text-lg font-medium text-white">13:05</p>
           </div>
         </div>
 
