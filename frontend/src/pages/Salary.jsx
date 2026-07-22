@@ -82,11 +82,11 @@ export default function Salary() {
               id="salary-year"
               defaultValue={salaryData.period.year}
               className="
-                w-full appearance-none rounded-xl border border-white/[0.04]
-                bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none
-                transition-all hover:bg-white/[0.05]
-                focus:border-primaryC/50 focus:bg-white/[0.06]
-              "
+    w-full appearance-none rounded-xl border border-white/[0.04]
+    bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none
+    transition-all hover:bg-white/[0.05]
+    focus:border-primaryC/50 focus:bg-white/[0.06]
+  "
             >
               <option value="1404" className="bg-[#1c1c1e]">
                 ۱۴۰۴
@@ -94,6 +94,18 @@ export default function Salary() {
 
               <option value="1403" className="bg-[#1c1c1e]">
                 ۱۴۰۳
+              </option>
+
+              <option value="1402" className="bg-[#1c1c1e]">
+                ۱۴۰۲
+              </option>
+
+              <option value="1401" className="bg-[#1c1c1e]">
+                ۱۴۰۱
+              </option>
+
+              <option value="1400" className="bg-[#1c1c1e]">
+                ۱۴۰۰
               </option>
             </select>
           </div>
@@ -111,11 +123,11 @@ export default function Salary() {
               id="salary-month"
               defaultValue={salaryData.period.month}
               className="
-                w-full appearance-none rounded-xl border border-white/[0.04]
-                bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none
-                transition-all hover:bg-white/[0.05]
-                focus:border-primaryC/50 focus:bg-white/[0.06]
-              "
+    w-full appearance-none rounded-xl border border-white/[0.04]
+    bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none
+    transition-all hover:bg-white/[0.05]
+    focus:border-primaryC/50 focus:bg-white/[0.06]
+  "
             >
               <option value="1" className="bg-[#1c1c1e]">
                 فروردین
@@ -131,6 +143,38 @@ export default function Salary() {
 
               <option value="4" className="bg-[#1c1c1e]">
                 تیر
+              </option>
+
+              <option value="5" className="bg-[#1c1c1e]">
+                مرداد
+              </option>
+
+              <option value="6" className="bg-[#1c1c1e]">
+                شهریور
+              </option>
+
+              <option value="7" className="bg-[#1c1c1e]">
+                مهر
+              </option>
+
+              <option value="8" className="bg-[#1c1c1e]">
+                آبان
+              </option>
+
+              <option value="9" className="bg-[#1c1c1e]">
+                آذر
+              </option>
+
+              <option value="10" className="bg-[#1c1c1e]">
+                دی
+              </option>
+
+              <option value="11" className="bg-[#1c1c1e]">
+                بهمن
+              </option>
+
+              <option value="12" className="bg-[#1c1c1e]">
+                اسفند
               </option>
             </select>
           </div>
