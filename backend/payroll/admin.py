@@ -1,15 +1,14 @@
 from django.contrib import admin
-from django.shortcuts import redirect
 from .models import PayrollConfig, Payslip
-
 
 @admin.register(PayrollConfig)
 class PayrollConfigAdmin(admin.ModelAdmin):
-    list_display = ['tax_rate', 'insurance_rate', 'overtime_multiplier', 'updated_at']
-
-    def has_add_permission(self, request):
-        return not PayrollConfig.objects.exists()
-
+    list_display = [
+        '__str__', 'department', 'contract_type', 
+        'standard_start_time', 'standard_end_time', 
+        'lateness_multiplier', 'overtime_multiplier'
+    ]
+    list_filter = ['department', 'contract_type']
 
 @admin.register(Payslip)
 class PayslipAdmin(admin.ModelAdmin):
