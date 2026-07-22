@@ -1,46 +1,49 @@
-from rest_framework import viewsets, generics, filters
+from rest_framework import viewsets, filters
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .serializers import PayrollConfigSerializer, PayslipSerializer
 from payroll.models import PayrollConfig, Payslip
 from .permissions import IsFinanceManager, IsOwnerOrFinanceManager
-from django_filters.rest_framework import DjangoFilterBackend
 from hr.api.pagination import StandardResultsSetPagination
 
 # ==========================================
-# 1. Payroll Config API (Singleton)
+# 1. Payroll Config API (Now a Full CRUD ViewSet)
 # ==========================================
 @extend_schema_view(
-    get=extend_schema(
+    list=extend_schema(
+        summary="List Payroll Configurations",
+        description="Returns all payroll configurations linked to specific departments or contract types."
+    ),
+    retrieve=extend_schema(
         summary="Retrieve Payroll Configuration",
-        description="Returns the global payroll settings (Tax, Insurance, and Overtime multiplier). If no configuration exists, it initializes with default zero values.",
-        responses={200: PayrollConfigSerializer}
+        description="Fetch a single payroll configuration by ID."
     ),
-    put=extend_schema(
+    create=extend_schema(
+        summary="Create Payroll Configuration",
+        description="Creates a new payroll config. Ensure it is mapped to a department or contract type."
+    ),
+    update=extend_schema(
         summary="Full Update Payroll Configuration",
-        description="Updates all fields of the global payroll configuration. Only accessible by Finance Managers.",
-        responses={200: PayrollConfigSerializer}
+        description="Updates all fields of the payroll configuration. Only accessible by Finance Managers."
     ),
-    patch=extend_schema(
+    partial_update=extend_schema(
         summary="Partial Update Payroll Configuration",
-        description="Updates specific fields of the global payroll configuration. Only accessible by Finance Managers.",
-        responses={200: PayrollConfigSerializer}
+        description="Updates specific fields of the payroll configuration."
+    ),
+    destroy=extend_schema(
+        summary="Delete Payroll Configuration",
+        description="Permanently deletes a payroll configuration record."
     )
 )
-class PayrollConfigAPIView(generics.RetrieveUpdateAPIView):
+class PayrollConfigViewSet(viewsets.ModelViewSet):
+    queryset = PayrollConfig.objects.all()
     serializer_class = PayrollConfigSerializer
     permission_classes = [IsFinanceManager]
-
-    def get_object(self):
-        obj, created = PayrollConfig.objects.get_or_create(
-            id=1, 
-            defaults={
-                'tax_rate': 0.0, 
-                'insurance_rate': 0.0, 
-                'overtime_multiplier': 1.0
-            }
-        )
-        return obj
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    
+    filterset_fields = ['department', 'contract_type']
 
 # ==========================================
 # 2. Payslip ViewSet (CRUD)
