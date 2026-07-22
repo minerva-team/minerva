@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.db import transaction
 from accounts.models import User
-from hr.models import Department, Employee, Contract, Attendance, LeaveType, LeaveRequest
+from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,6 +69,10 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
             )
         return employee
 
+class ContractTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContractType
+        fields = '__all__'
 class ContractSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
