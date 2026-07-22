@@ -2,9 +2,13 @@ from rest_framework import serializers
 from payroll.models import PayrollConfig, Payslip
 
 class PayrollConfigSerializer(serializers.ModelSerializer):
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    contract_type_name = serializers.CharField(source='contract_type.name', read_only=True)
+
     class Meta:
         model = PayrollConfig
         fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class PayslipSerializer(serializers.ModelSerializer):

@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse # type: ignore
 from rest_framework.permissions import IsAuthenticated
 
-from hr.models import Department, Employee, Contract, Attendance, LeaveType, LeaveRequest
+from hr.models import Department, Employee, Contract,ContractType ,Attendance, LeaveType, LeaveRequest
 from .permissions import IsHRManagerRole
 from . import serializers
 
@@ -53,6 +53,39 @@ class EmployeeViewSet(HRBaseViewSet):
 
 
 @extend_schema_view(
+    list=extend_schema(
+        summary="List Contract Types",
+        description="Get a list of all defined contract types (e.g., Full-time, Part-time, Hourly)."
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve Contract Type Detail",
+        description="Fetch details of a specific contract type by its ID."
+    ),
+    create=extend_schema(
+        summary="Create New Contract Type",
+        description="Define a new contract type for the enterprise."
+    ),
+    update=extend_schema(
+        summary="Full Update Contract Type",
+        description="Modify all fields of an existing contract type."
+    ),
+    partial_update=extend_schema(
+        summary="Partial Update Contract Type",
+        description="Modify specific fields of an existing contract type."
+    ),
+    destroy=extend_schema(
+        summary="Delete Contract Type",
+        description="Permanently remove a contract type record."
+    )
+)
+class ContractTypeViewSet(HRBaseViewSet):
+    queryset = ContractType.objects.all()
+    serializer_class = serializers.ContractTypeSerializer
+    search_fields = ['name']
+    ordering_fields = ['name', 'created_at']    
+
+
+@extend_schema_view(
     create=extend_schema(
         summary="Create Contract",
         description="Create new contract. System checks that duplicate active contracts are not created.",
@@ -60,7 +93,7 @@ class EmployeeViewSet(HRBaseViewSet):
     )
 )
 class ContractViewSet(HRBaseViewSet):
-    queryset = Contract.objects.select_related('employee', 'employee__user').all()
+    queryset = Contract.objects.select_related('employee', 'employee__user', 'contract_type').all()
     serializer_class = serializers.ContractSerializer
     filterset_fields = ['employee', 'is_active', 'contract_type']
     ordering_fields = ['start_date', 'base_salary']

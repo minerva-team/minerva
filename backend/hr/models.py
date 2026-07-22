@@ -49,16 +49,23 @@ class Employee(BaseModel):
     def __str__(self):
         return f"{self.user.email} ({self.employee_code})"
 
+class ContractType(BaseModel):
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Contract Type"
+        verbose_name_plural = "Contract Types"
+
+    def __str__(self):
+        return self.name
+
 
 class Contract(BaseModel):
-    CONTRACT_TYPE_CHOICES = [
-        ('Full-time', 'Full-time'),
-        ('Part-time', 'Part-time'),
-        ('Hourly', 'Hourly'),
-    ]
-    
+
     employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
-    contract_type = models.CharField(max_length=20, choices=CONTRACT_TYPE_CHOICES)
+    contract_type = models.ForeignKey(ContractType, on_delete=models.PROTECT, related_name='contracts')
     base_salary = models.DecimalField(max_digits=12, decimal_places=2)
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
