@@ -24,12 +24,12 @@ const topMenuItems = [
   {
     title: 'کارت دوم',
     to: '/dashboard/overtime',
-    icon: Wallet,
+    icon: Calendar,
   },
   {
-    title: 'کارت سوم',
-    to: '/dashboard/leave',
-    icon: Calendar,
+    title: 'فیش حقوقی',
+    to: '/dashboard/salary',
+    icon: Wallet,
   },
 ]
 

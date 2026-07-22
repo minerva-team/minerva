@@ -7,6 +7,7 @@ export default function Header() {
   const pageTitles = {
     '/dashboard': 'داشبورد',
     '/dashboard/attendance': 'ثبت حضور و مرخصی',
+    '/dashboard/salary': ' فیش حقوقی',
   }
 
   const pageTitle = pageTitles[location.pathname] || 'داشبورد'
