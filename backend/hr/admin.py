@@ -11,6 +11,11 @@ class EmployeeAdmin(admin.ModelAdmin):
     list_display = ['user', 'employee_code', 'national_id', 'is_deleted']
     search_fields = ['employee_code', 'national_id']
     list_filter = ['is_deleted', 'department']
+
+@admin.register(ContractType)
+class ContractTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_at']
+    search_fields = ['name']
     
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
