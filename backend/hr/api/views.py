@@ -148,7 +148,6 @@ class AttendanceViewSet(HRBaseViewSet):
     def clock_out(self, request):
         user = request.user
         
-        # چک کردن داشتن پروفایل کارمندی
         if not hasattr(user, 'employee_profile'):
             return Response(
                 {"detail": "Only employees with active profiles can clock out."}, 
