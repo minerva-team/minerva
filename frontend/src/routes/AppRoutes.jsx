@@ -4,6 +4,7 @@ import Login from '../pages/Login'
 import DashboardLayout from '../layouts/DashboardLayout'
 import DashboardHome from '../pages/DashboardHome'
 import Setting from '../pages/Settings'
+import Salary from '../pages/Salary'
 import NotFound from '../pages/NotFound'
 
 import ProtectedRoute from './ProtectedRoute'
@@ -20,6 +21,7 @@ export default function AppRoutes() {
           <Route index element={<DashboardHome />} />
           <Route path="attendance" element={<AttendanceLeave />} />
           <Route path="settings" element={<Setting />} />
+          <Route path="salary" element={<Salary />} />
         </Route>
       </Route>
 
