@@ -1,10 +1,12 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse # type: ignore
-from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 
-from hr.models import Department, Employee, Contract,ContractType ,Attendance, LeaveType, LeaveRequest
+from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
 from .permissions import IsHRManagerRole
 from . import serializers
 
@@ -101,8 +103,8 @@ class ContractViewSet(HRBaseViewSet):
 
 @extend_schema_view(
     create=extend_schema(
-        summary="Log Attendance",
-        description="Record attendance. Combination of employee and date must be unique.",
+        summary="Log Attendance (Clock-In)",
+        description="Record morning attendance. Combination of employee and date must be unique. Frontend does not need to send employee_id.",
         responses={400: OpenApiResponse(description="Attendance for this date has already been recorded.")}
     )
 )
@@ -138,6 +140,48 @@ class AttendanceViewSet(HRBaseViewSet):
         else:
             serializer.save()
 
+    @extend_schema(
+        summary="Clock-Out", 
+        description="Automatically finds today's attendance record for the logged-in employee and sets the clock_out time."
+    )
+    @action(detail=False, methods=['post'], url_path='clock-out')
+    def clock_out(self, request):
+        user = request.user
+        
+        # چک کردن داشتن پروفایل کارمندی
+        if not hasattr(user, 'employee_profile'):
+            return Response(
+                {"detail": "Only employees with active profiles can clock out."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        today = timezone.now().date()
+        current_time = timezone.now().time()
+
+        attendance = Attendance.objects.filter(
+            employee=user.employee_profile, 
+            date=today
+        ).first()
+
+        if not attendance:
+            return Response(
+                {"detail": "No attendance record found for today. Please clock in first."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if attendance.clock_out:
+            return Response(
+                {"detail": "Clock-out time has already been recorded for today."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        attendance.clock_out = current_time
+        attendance.save()
+
+        return Response(
+            {"detail": "Clock-out recorded successfully.", "clock_out": current_time}, 
+            status=status.HTTP_200_OK
+        )
 class LeaveTypeViewSet(HRBaseViewSet):
     queryset = LeaveType.objects.all()
     serializer_class = serializers.LeaveTypeSerializer
