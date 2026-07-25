@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "react-multi-date-picker": "^2.4.12",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
