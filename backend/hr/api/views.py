@@ -246,3 +246,31 @@ class LeaveRequestViewSet(HRBaseViewSet):
                 return serializers.LeaveRequestHRSerializer
                 
         return serializers.LeaveRequestEmployeeSerializer
+
+    @extend_schema(summary="Approve Leave Request")
+    @action(detail=True, methods=['post'], url_path='approve')
+    def approve_leave(self, request, pk=None):
+        """
+        تایید مرخصی فقط توسط مدیر منابع انسانی
+        """
+        leave_request = self.get_object()
+        
+        leave_request.status = 'Approved'
+        leave_request.approved_by = request.user.employee_profile
+        leave_request.save()
+        
+        return Response({"detail": "مرخصی با موفقیت تایید شد."})
+
+    @extend_schema(summary="Reject Leave Request")
+    @action(detail=True, methods=['post'], url_path='reject')
+    def reject_leave(self, request, pk=None):
+        """
+        رد مرخصی فقط توسط مدیر منابع انسانی
+        """
+        leave_request = self.get_object()
+        
+        leave_request.status = 'Rejected'
+        leave_request.approved_by = request.user.employee_profile
+        leave_request.save()
+        
+        return Response({"detail": "مرخصی رد شد."})
