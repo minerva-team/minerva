@@ -97,14 +97,23 @@ class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = '__all__'
+        
+        read_only_fields = ['employee']
+        
 
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Attendance.objects.all(),
-                fields=['employee', 'date'],
-                message="Attendance for this employee on this date has already been recorded."
-            )
-        ]
+    def validate(self, attrs):
+        request = self.context.get('request')
+        date = attrs.get('date')
+
+        if request and hasattr(request.user, 'employee_profile'):
+            employee = request.user.employee_profile
+            
+            if Attendance.objects.filter(employee=employee, date=date).exists():
+                raise serializers.ValidationError(
+                    {"date": "Attendance for this date has already been recorded."}
+                )
+                
+        return attrs
 
 class LeaveTypeSerializer(serializers.ModelSerializer):
     class Meta:
