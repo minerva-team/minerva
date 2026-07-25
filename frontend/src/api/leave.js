@@ -11,3 +11,7 @@ export function submitLeaveRequest(data) {
     body: JSON.stringify(data),
   })
 }
+
+export function getMyLeaveRequests() {
+  return apiFetch('/hr/leave-requests/')
+}

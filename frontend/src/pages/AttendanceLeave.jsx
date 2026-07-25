@@ -8,8 +8,10 @@ import gregorian from 'react-date-object/calendars/gregorian'
 import gregorian_en from 'react-date-object/locales/gregorian_en'
 import 'react-multi-date-picker/styles/colors/purple.css'
 import 'react-multi-date-picker/styles/backgrounds/bg-dark.css'
-import { getLeaveTypes, submitLeaveRequest } from '@/api/leave'
+// ایمپورت‌ها دقیق و تمیز شدن
+import { getLeaveTypes, submitLeaveRequest, getMyLeaveRequests } from '@/api/leave'
 import { toast } from 'sonner'
+import { CalendarClock } from 'lucide-react' 
 
 export default function AttendanceLeave() {
   const [attendance, setAttendance] = useState(null)
@@ -22,23 +24,32 @@ export default function AttendanceLeave() {
   const [endDate, setEndDate] = useState(null)
   const [description, setDescription] = useState('')
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false)
-
+  
+  // استیت لیست مرخصی‌های من
+  const [myLeaves, setMyLeaves] = useState([])
 
   const today = new Date().toISOString().split('T')[0]
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const attendanceData = await getAttendance()
+        const [attendanceData, typesData, leavesData] = await Promise.all([
+          getAttendance(),
+          getLeaveTypes(),
+          getMyLeaveRequests()
+        ])
+
         setAttendance(attendanceData)
         
-        const typesData = await getLeaveTypes()
         setLeaveTypes(typesData.results || typesData)
         if (typesData.length > 0 || typesData.results?.length > 0) {
           setSelectedLeave(typesData.results ? typesData.results[0].id : typesData[0].id)
         }
+
+        setMyLeaves(leavesData.results || leavesData)
+
       } catch (err) {
-        toast.error('خطا در دریافت اطلاعات اولیه.') 
+        toast.error('خطا در دریافت اطلاعات اولیه.')
       } finally {
         setIsLoading(false)
       }
@@ -52,7 +63,6 @@ export default function AttendanceLeave() {
 
   async function handleClockIn() {
     setIsClockingIn(true)
-
     try {
       await clockIn({})
       const data = await getAttendance()
@@ -72,7 +82,6 @@ export default function AttendanceLeave() {
 
   async function handleClockOut() {
     setIsClockingOut(true)
-
     try {
       await clockOut({})
       const data = await getAttendance()
@@ -83,7 +92,7 @@ export default function AttendanceLeave() {
         const errorMessages = Object.values(err.response.data).flat().join(' ')
         toast.error(`خطا: ${errorMessages}`)
       } else {
-        toast.error('مشکلی در ثبت خروج پیش آمد. لطفاً دوباره تلاش کنید.')
+        toast.error('مشکلی در ثبت خروج پیش آمد.')
       }
     } finally {
       setIsClockingOut(false)
@@ -98,18 +107,9 @@ export default function AttendanceLeave() {
         const dummyDate = new Date()
         dummyDate.setHours(parseInt(hours, 10))
         dummyDate.setMinutes(parseInt(minutes, 10))
-        
-        return dummyDate.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        })
+        return dummyDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
       }
-      return new Date(timeValue).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      })
+      return new Date(timeValue).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
     } catch (err) {
       return '--:--'
     }
@@ -118,7 +118,6 @@ export default function AttendanceLeave() {
   function getStatusText(record) {
     if (!record) return 'ثبت نشده'
     if (record.clock_out) return 'پایان کار'
-
     switch (record.status) {
       case 'Present': return 'مشغول کار'
       case 'Absent': return 'غایب'
@@ -130,7 +129,6 @@ export default function AttendanceLeave() {
   function getStatusColors(record) {
     if (!record) return { ping: 'bg-gray-400', dot: 'bg-gray-500' }
     if (record.clock_out) return { ping: 'bg-blue-400', dot: 'bg-blue-500' }
-
     switch (record.status) {
       case 'Present': return { ping: 'bg-green-400', dot: 'bg-green-500' }
       case 'Absent': return { ping: 'bg-red-400', dot: 'bg-red-500' }
@@ -140,7 +138,7 @@ export default function AttendanceLeave() {
   }
 
   const statusColors = getStatusColors(todayAttendance)
-  
+
   async function handleLeaveSubmit(e) {
     e.preventDefault()
 
@@ -165,6 +163,9 @@ export default function AttendanceLeave() {
 
       toast.success('درخواست مرخصی با موفقیت ثبت شد.', { id: toastId })
       
+      const updatedLeaves = await getMyLeaveRequests()
+      setMyLeaves(updatedLeaves.results || updatedLeaves)
+
       setStartDate(null)
       setEndDate(null)
       setDescription('')
@@ -175,61 +176,53 @@ export default function AttendanceLeave() {
     }
   }
 
+  function getLeaveStatusStyle(status) {
+    switch(status) {
+      case 'Approved': return 'bg-green-500/10 text-green-400 border-green-500/20'
+      case 'Rejected': return 'bg-red-500/10 text-red-400 border-red-500/20'
+      default: return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+    }
+  }
+
+  function getLeaveStatusText(status) {
+    switch(status) {
+      case 'Approved': return 'تایید شده'
+      case 'Rejected': return 'رد شده'
+      default: return 'در انتظار بررسی'
+    }
+  }
+
   return (
     <div className="w-full space-y-6 text-white" dir="rtl">
-      {/* Attendance Section */}
+      
       <section className="rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 sm:p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
-            وضعیت حضور
-          </h1>
-          <p className="mt-1 text-sm text-white/50">
-            زمان‌های ثبت‌شده شما در سیستم برای امروز
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">وضعیت حضور</h1>
+          <p className="mt-1 text-sm text-white/50">زمان‌های ثبت‌شده شما در سیستم برای امروز</p>
         </div>
 
-        {isLoading && (
-          <p className="text-sm text-white/50">در حال دریافت اطلاعات حضور...</p>
-        )}
+        {isLoading && <p className="text-sm text-white/50">در حال دریافت اطلاعات حضور...</p>}
 
         {!isLoading && (
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-2xl bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]">
-                <p className="mb-2 text-xs font-medium text-white/50">
-                  وضعیت فعلی
-                </p>
+                <p className="mb-2 text-xs font-medium text-white/50">وضعیت فعلی</p>
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-2.5 w-2.5 shrink-0">
-                    <span
-                      className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${statusColors.ping}`}
-                    />
-                    <span
-                      className={`relative inline-flex h-2.5 w-2.5 rounded-full ${statusColors.dot}`}
-                    />
+                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${statusColors.ping}`} />
+                    <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${statusColors.dot}`} />
                   </span>
-                  <p className="text-lg font-medium tracking-wide text-white">
-                    {getStatusText(todayAttendance)}
-                  </p>
+                  <p className="text-lg font-medium tracking-wide text-white">{getStatusText(todayAttendance)}</p>
                 </div>
               </div>
-
               <div className="rounded-2xl bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]">
-                <p className="mb-2 text-xs font-medium text-white/50">
-                  آخرین زمان ورود
-                </p>
-                <p className="font-mono text-lg font-medium text-white">
-                  {formatTime(todayAttendance?.clock_in)}
-                </p>
+                <p className="mb-2 text-xs font-medium text-white/50">آخرین زمان ورود</p>
+                <p className="font-mono text-lg font-medium text-white">{formatTime(todayAttendance?.clock_in)}</p>
               </div>
-
               <div className="rounded-2xl bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.05]">
-                <p className="mb-2 text-xs font-medium text-white/50">
-                  آخرین زمان خروج
-                </p>
-                <p className="font-mono text-lg font-medium text-white">
-                  {formatTime(todayAttendance?.clock_out)}
-                </p>
+                <p className="mb-2 text-xs font-medium text-white/50">آخرین زمان خروج</p>
+                <p className="font-mono text-lg font-medium text-white">{formatTime(todayAttendance?.clock_out)}</p>
               </div>
             </div>
 
@@ -237,49 +230,25 @@ export default function AttendanceLeave() {
               <button
                 onClick={handleClockIn}
                 disabled={isClockingIn || Boolean(todayAttendance?.clock_in)}
-                className="
-                  w-full rounded-xl bg-primaryC px-8 py-3.5 text-sm font-medium
-                  text-white transition-all hover:opacity-90 active:scale-95
-                  disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto
-                "
+                className="w-full rounded-xl bg-primaryC px-8 py-3.5 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
-                {isClockingIn
-                  ? 'در حال ثبت...'
-                  : todayAttendance?.clock_in
-                    ? 'ورود ثبت شده'
-                    : 'ثبت ورود'}
+                {isClockingIn ? 'در حال ثبت...' : todayAttendance?.clock_in ? 'ورود ثبت شده' : 'ثبت ورود'}
               </button>
-
               <button
                 onClick={handleClockOut}
-                disabled={
-                  isClockingOut ||
-                  !todayAttendance?.clock_in ||
-                  Boolean(todayAttendance?.clock_out)
-                }
-                className="
-                  w-full rounded-xl bg-primaryC px-8 py-3.5 text-sm font-medium
-                  text-white transition-all hover:opacity-90 active:scale-95
-                  disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto
-                "
+                disabled={isClockingOut || !todayAttendance?.clock_in || Boolean(todayAttendance?.clock_out)}
+                className="w-full rounded-xl bg-primaryC px-8 py-3.5 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
-                {isClockingOut
-                  ? 'در حال ثبت...'
-                  : todayAttendance?.clock_out
-                    ? 'خروج ثبت شده'
-                    : 'ثبت خروج'}
+                {isClockingOut ? 'در حال ثبت...' : todayAttendance?.clock_out ? 'خروج ثبت شده' : 'ثبت خروج'}
               </button>
             </div>
           </>
         )}
       </section>
 
-      {/* Leave Request Section */}
       <section className="rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 sm:p-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            درخواست مرخصی
-          </h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">درخواست مرخصی</h2>
         </div>
 
         <form onSubmit={handleLeaveSubmit} className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
@@ -291,13 +260,10 @@ export default function AttendanceLeave() {
               className="w-full appearance-none rounded-xl border border-white/[0.04] bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none transition-all hover:bg-white/[0.05] focus:border-primaryC/50 focus:bg-white/[0.06]"
             >
               {Array.isArray(leaveTypes) && leaveTypes.map((type) => (
-                <option key={type.id} value={type.id} className="bg-[#1c1c1e]">
-                  {type.name}
-                </option>
+                <option key={type.id} value={type.id} className="bg-[#1c1c1e]">{type.name}</option>
               ))}
             </select>
           </div>
-
           <div className="flex flex-col gap-2">
             <label className="pl-1 text-xs font-medium text-white/60">تاریخ شروع</label>
             <DatePicker
@@ -310,7 +276,6 @@ export default function AttendanceLeave() {
               placeholder="انتخاب کنید"
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <label className="pl-1 text-xs font-medium text-white/60">تاریخ پایان</label>
             <DatePicker
@@ -323,7 +288,6 @@ export default function AttendanceLeave() {
               placeholder="انتخاب کنید"
             />
           </div>
-
           <div className="flex flex-col gap-2 md:col-span-2">
             <label className="pl-1 text-xs font-medium text-white/60">توضیحات (اختیاری)</label>
             <textarea
@@ -333,7 +297,6 @@ export default function AttendanceLeave() {
               className="w-full resize-none rounded-xl border border-white/[0.04] bg-white/[0.03] px-4 py-3.5 text-sm text-white outline-none transition-all hover:bg-white/[0.05] focus:border-primaryC/50 focus:bg-white/[0.06]"
             />
           </div>
-
           <div className="mt-8 flex justify-end md:col-span-2">
             <button
               type="submit"
@@ -345,6 +308,54 @@ export default function AttendanceLeave() {
           </div>
         </form>
       </section>
+
+      {/* بخش سوابق مرخصی‌ها دقیقاً اینجاست و حالا باید رندر بشه */}
+      <section className="rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 sm:p-8">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primaryC/20 text-primaryC">
+            <CalendarClock size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-white">سوابق مرخصی‌های من</h2>
+            <p className="mt-1 text-xs text-white/50">پیگیری وضعیت درخواست‌های ثبت شده</p>
+          </div>
+        </div>
+
+        {myLeaves.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">
+            هنوز هیچ درخواست مرخصی‌ای ثبت نکرده‌اید.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {myLeaves.map((leave) => (
+              <div 
+                key={leave.id} 
+                className="flex flex-col justify-between gap-4 rounded-2xl border border-white/[0.02] bg-white/[0.02] p-5 sm:flex-row sm:items-center transition-colors hover:bg-white/[0.04]"
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-white">
+                    {leave.leave_type_name || 'مرخصی'} 
+                  </span>
+                  <span className="font-mono text-xs text-white/40">
+                    {leave.start_date} تا {leave.end_date}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-4">
+                  {leave.reason && (
+                    <span className="truncate max-w-[150px] text-xs text-white/30" title={leave.reason}>
+                      {leave.reason}
+                    </span>
+                  )}
+                  <span className={`rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-md ${getLeaveStatusStyle(leave.status)}`}>
+                    {getLeaveStatusText(leave.status)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
     </div>
   )
 }
