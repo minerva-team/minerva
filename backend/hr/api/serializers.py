@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.db import transaction
 from accounts.models import User
 from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
-
+from django.utils import timezone
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
@@ -97,23 +97,29 @@ class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = '__all__'
+        read_only_fields = ['employee']
         
-        read_only_fields = ['employee', 'date', 'clock_in', 'clock_out'] 
-        
+        extra_kwargs = {
+            'status': {'required': False},
+            'date': {'required': False},
+            'clock_in': {'required': False},
+            'clock_out': {'required': False},
+        }
 
     def validate(self, attrs):
         request = self.context.get('request')
         
-        from django.utils import timezone
-        today_date = timezone.localtime(timezone.now()).date()
+        date = attrs.get('date')
+        if not date:
+            date = timezone.localtime(timezone.now()).date()
 
         if request and hasattr(request.user, 'employee_profile'):
-            employee = request.user.employee_profile
-            
-            if Attendance.objects.filter(employee=employee, date=today_date).exists():
-                raise serializers.ValidationError(
-                    {"detail": "Attendance for today has already been recorded."}
-                )
+            if request.user.role == 'Employee':
+                employee = request.user.employee_profile
+                if Attendance.objects.filter(employee=employee, date=date).exists():
+                    raise serializers.ValidationError(
+                        {"detail": "ورود شما برای امروز قبلاً ثبت شده است."} 
+                    )
                 
         return attrs
 
@@ -131,7 +137,7 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     extra_kwargs = {'employee': {'required': False}}
-    
+
     def validate(self, attrs):
         start_date = attrs.get("start_date", self.instance.start_date if self.instance else None)
         end_date = attrs.get("end_date", self.instance.end_date if self.instance else None)
