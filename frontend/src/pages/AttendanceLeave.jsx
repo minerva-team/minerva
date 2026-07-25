@@ -177,12 +177,12 @@ export default function AttendanceLeave() {
   }
 
   function getLeaveStatusStyle(status) {
-    switch(status) {
-      case 'Approved': return 'bg-green-500/10 text-green-400 border-green-500/20'
-      case 'Rejected': return 'bg-red-500/10 text-red-400 border-red-500/20'
-      default: return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+      switch(status) {
+        case 'Approved': return 'bg-green-500/15 text-green-400' 
+        case 'Rejected': return 'bg-red-500/15 text-red-400'
+        default: return 'bg-[#f59e0b]/15 text-[#fbbf24]'
+      }
     }
-  }
 
   function getLeaveStatusText(status) {
     switch(status) {
@@ -309,44 +309,42 @@ export default function AttendanceLeave() {
         </form>
       </section>
 
-      {/* بخش سوابق مرخصی‌ها دقیقاً اینجاست و حالا باید رندر بشه */}
       <section className="rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 sm:p-8">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primaryC/20 text-primaryC">
-            <CalendarClock size={20} />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-white">سوابق مرخصی‌های من</h2>
-            <p className="mt-1 text-xs text-white/50">پیگیری وضعیت درخواست‌های ثبت شده</p>
-          </div>
+        
+        <div className="mb-6 flex flex-col items-start">
+          <h2 className="text-xl font-semibold tracking-tight text-white/90">سوابق مرخصی‌های من</h2>
+          <p className="mt-1.5 text-sm text-white/40">پیگیری وضعیت درخواست‌های ثبت‌شده</p>
         </div>
 
         {myLeaves.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">
+          <div className="rounded-2xl border border-dashed border-white/5 py-10 text-center text-sm text-white/30">
             هنوز هیچ درخواست مرخصی‌ای ثبت نکرده‌اید.
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             {myLeaves.map((leave) => (
               <div 
                 key={leave.id} 
-                className="flex flex-col justify-between gap-4 rounded-2xl border border-white/[0.02] bg-white/[0.02] p-5 sm:flex-row sm:items-center transition-colors hover:bg-white/[0.04]"
+                className="group flex flex-col justify-between gap-4 rounded-2xl bg-white/[0.02] px-5 py-4 transition-all duration-300 hover:bg-white/[0.04] sm:flex-row sm:items-center"
               >
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium text-white">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm font-medium tracking-wide text-white/90">
                     {leave.leave_type_name || 'مرخصی'} 
                   </span>
-                  <span className="font-mono text-xs text-white/40">
-                    {leave.start_date} تا {leave.end_date}
-                  </span>
+                  <div className="flex items-center gap-1.5 font-mono text-xs text-white/40">
+                    <span>{leave.start_date}</span>
+                    <span className="text-white/20">تا</span>
+                    <span>{leave.end_date}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between sm:justify-end gap-4">
+
+                <div className="flex items-center justify-between sm:justify-end gap-5">
                   {leave.reason && (
-                    <span className="truncate max-w-[150px] text-xs text-white/30" title={leave.reason}>
+                    <span className="truncate max-w-[130px] text-xs text-white/30 transition-colors group-hover:text-white/50" title={leave.reason}>
                       {leave.reason}
                     </span>
                   )}
-                  <span className={`rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-md ${getLeaveStatusStyle(leave.status)}`}>
+                  <span className={`rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide transition-colors ${getLeaveStatusStyle(leave.status)}`}>
                     {getLeaveStatusText(leave.status)}
                   </span>
                 </div>
