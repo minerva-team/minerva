@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { getAllLeaveRequests, approveLeave, rejectLeave } from '@/api/leave' 
 
 export default function HrLeaveManagement() {
   const [leaves, setLeaves] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    async function fetchLeaves() {
-      try {
-        setLeaves([
-          { id: 1, employee_name: 'شایان کریمی', leave_type_name: 'استحقاقی', start_date: '2026-07-28', end_date: '2026-07-30', status: 'Pending', reason: 'سفر خانوادگی' },
-          { id: 2, employee_name: 'علی حسینی', leave_type_name: 'استعلاجی', start_date: '2026-07-25', end_date: '2026-07-26', status: 'Approved', reason: 'مراجعه به پزشک' },
-          { id: 3, employee_name: 'سارا احمدی', leave_type_name: 'بدون حقوق', start_date: '2026-08-01', end_date: '2026-08-05', status: 'Rejected', reason: 'رسیدگی به امور شخصی' },
-        ])
-      } catch (error) {
-        toast.error('خطا در دریافت لیست مرخصی‌ها')
-      } finally {
-        setIsLoading(false)
-      }
+  const fetchLeaves = async () => {
+    setIsLoading(true)
+    try {
+      const data = await getAllLeaveRequests()
+      setLeaves(data.results || data) 
+    } catch (error) {
+      toast.error('خطا در دریافت لیست مرخصی‌ها از سرور')
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchLeaves()
   }, [])
 
@@ -31,21 +31,28 @@ export default function HrLeaveManagement() {
     }).format(date)
   }
 
+  // هندل کردن تایید و رد با API
   const handleStatusChange = async (id, newStatus) => {
+    // برای اینکه دکمه رو زد، سریع نوتیف لودینگ بیاد
+    const toastId = toast.loading('در حال اعمال تغییرات...')
+    
     try {
+      if (newStatus === 'Approved') {
+        await approveLeave(id)
+        toast.success('مرخصی با موفقیت تایید شد', { id: toastId })
+      } else if (newStatus === 'Rejected') {
+        await rejectLeave(id)
+        toast.success('مرخصی رد شد', { id: toastId })
+      }
+
+      // آپدیت کردن استیت لوکال برای اینکه صفحه سریع رفرش بشه و کاربر معطل نمونه
       setLeaves((prevLeaves) =>
         prevLeaves.map((leave) =>
           leave.id === id ? { ...leave, status: newStatus } : leave
         )
       )
-
-      if (newStatus === 'Approved') {
-        toast.success('مرخصی با موفقیت تایید شد')
-      } else {
-        toast.success('مرخصی رد شد')
-      }
     } catch (error) {
-      toast.error('خطا در ثبت تغییرات')
+      toast.error('خطا در برقراری ارتباط با سرور', { id: toastId })
     }
   }
 
@@ -87,10 +94,13 @@ export default function HrLeaveManagement() {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
                     <span className="text-base font-medium tracking-wide text-white/90">
-                      {leave.employee_name}
+                      {/* اینجا چک کن بک‌اند فیلد نام کارمند رو دقیقا چی برمی‌گردونه */}
+                      {/* احتمالاً leave.employee.user.first_name باشه یا مشابه این */}
+                      {leave.employee_name || 'کارمند'} 
                     </span>
                     <span className="rounded-md bg-white/[0.08] px-2 py-0.5 text-[11px] font-medium text-white/70">
-                      {leave.leave_type_name}
+                      {/* فیلد نوع مرخصی از بک‌اند */}
+                      {leave.leave_type_name || leave.leave_type || 'مرخصی'} 
                     </span>
                   </div>
                   

@@ -40,3 +40,10 @@ export async function apiFetch(endpoint, options = {}) {
 
   return data
 }
+
+export async function apiPost(endpoint, bodyData = {}) {
+  return apiFetch(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(bodyData),
+  })
+}
