@@ -181,14 +181,18 @@ class AttendanceViewSet(HRBaseViewSet):
             {"detail": "Clock-out recorded successfully.", "clock_out": current_time}, 
             status=status.HTTP_200_OK
         )
+
 class LeaveTypeViewSet(HRBaseViewSet):
     queryset = LeaveType.objects.all()
     serializer_class = serializers.LeaveTypeSerializer
     filterset_fields = ['is_paid']
     search_fields = ['name']
-     
-    pagination_class = None  # Disable pagination for LeaveType
+    pagination_class = None 
 
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated()]
+        return super().get_permissions()
 
 @extend_schema_view(
     create=extend_schema(
