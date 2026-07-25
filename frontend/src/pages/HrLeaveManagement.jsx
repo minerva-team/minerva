@@ -45,7 +45,6 @@ export default function HrLeaveManagement() {
         toast.success('مرخصی رد شد', { id: toastId })
       }
 
-      // آپدیت کردن استیت لوکال برای اینکه صفحه سریع رفرش بشه و کاربر معطل نمونه
       setLeaves((prevLeaves) =>
         prevLeaves.map((leave) =>
           leave.id === id ? { ...leave, status: newStatus } : leave
@@ -94,12 +93,9 @@ export default function HrLeaveManagement() {
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
                     <span className="text-base font-medium tracking-wide text-white/90">
-                      {/* اینجا چک کن بک‌اند فیلد نام کارمند رو دقیقا چی برمی‌گردونه */}
-                      {/* احتمالاً leave.employee.user.first_name باشه یا مشابه این */}
                       {leave.employee_name || 'کارمند'} 
                     </span>
                     <span className="rounded-md bg-white/[0.08] px-2 py-0.5 text-[11px] font-medium text-white/70">
-                      {/* فیلد نوع مرخصی از بک‌اند */}
                       {leave.leave_type_name || leave.leave_type || 'مرخصی'} 
                     </span>
                   </div>
