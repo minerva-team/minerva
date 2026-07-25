@@ -1,3 +1,4 @@
+// src/api/attendance.js
 import { apiFetch } from './client'
 
 export function getAttendance() {
