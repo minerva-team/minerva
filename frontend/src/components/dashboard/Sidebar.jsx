@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+
 import {
   LayoutDashboard,
   Wallet,
@@ -42,6 +44,12 @@ const bottomMenuItems = [
 ]
 
 export default function Sidebar() {
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem('access')
+    navigate('/login')
+  }
   return (
     <aside className="flex h-screen w-72 flex-col justify-between border-l border-white/10 bg-backgroundC p-6">
       {/* بالا */}
@@ -69,7 +77,10 @@ export default function Sidebar() {
           <SidebarItem key={item.title} {...item} />
         ))}
 
-        <button className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-red-400 transition-all duration-200 hover:bg-red-500/20">
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-red-400 transition-all duration-200 hover:bg-red-500/20"
+        >
           <span>خروج</span>
           <LogOut size={20} />
         </button>
