@@ -240,25 +240,22 @@ class LeaveRequestViewSet(HRBaseViewSet):
         return queryset.filter(employee__user=user)
         
     def perform_create(self, serializer):
-        """
-        If an employee clocks in by themselves:
-            -> The server time and status 'Present' will be used automatically.
-
-        If HR or an Admin logs it manually:
-            -> The data submitted in the form will be saved.
-        """
-        user = self.request.user
-        
-        if user.role == 'Employee':
-            local_time = timezone.localtime(timezone.now())
-            serializer.save(
-                employee=user.employee_profile,
-                date=local_time.date(),
-                clock_in=local_time.time(),
-                status='Present'
-            )
-        else:
-            serializer.save()
+            """
+            اگر کارمند درخواست مرخصی داد:
+                -> آیدی خودش به عنوان درخواست‌دهنده ثبت میشه.
+            اگر مدیر (HR) درخواست رو ثبت کرد:
+                -> اگر آیدی کارمندی رو فرستاده بود، برای اون ثبت میشه.
+                -> اگر نفرستاده بود، برای خود مدیر ثبت میشه.
+            """
+            user = self.request.user
+            
+            if user.role == 'Employee':
+                serializer.save(employee=user.employee_profile)
+            else:
+                if 'employee' not in self.request.data:
+                    serializer.save(employee=user.employee_profile)
+                else:
+                    serializer.save()
 
     def get_serializer_class(self):
         """
