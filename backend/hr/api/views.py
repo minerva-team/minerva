@@ -133,12 +133,22 @@ class AttendanceViewSet(HRBaseViewSet):
     def perform_create(self, serializer):
         """
         Ensures employees can only log attendance for themselves.
+        Always uses server time for security.
         """
         user = self.request.user
+        
+        local_time = timezone.localtime(timezone.now())
+        
+        secure_data = {
+            'date': local_time.date(),
+            'clock_in': local_time.time(),
+            'status': 'Present'
+        }
+
         if user.role == 'Employee':
-            serializer.save(employee=user.employee_profile)
+            serializer.save(employee=user.employee_profile, **secure_data)
         else:
-            serializer.save()
+            serializer.save(**secure_data)
 
     @extend_schema(
         summary="Clock-Out", 
@@ -154,8 +164,9 @@ class AttendanceViewSet(HRBaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        today = timezone.now().date()
-        current_time = timezone.now().time()
+        local_time = timezone.localtime(timezone.now())
+        today = local_time.date()
+        current_time = local_time.time()
 
         attendance = Attendance.objects.filter(
             employee=user.employee_profile, 
