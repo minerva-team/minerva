@@ -246,7 +246,7 @@ class LeaveRequestViewSet(HRBaseViewSet):
         """
         user = self.request.user
         
-        if user.role == 'Employee':
+        if 'employee' not in self.request.data:
             serializer.save(employee=user.employee_profile)
         else:
             serializer.save()
