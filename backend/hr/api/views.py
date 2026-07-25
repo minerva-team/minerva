@@ -133,12 +133,22 @@ class AttendanceViewSet(HRBaseViewSet):
     def perform_create(self, serializer):
         """
         Ensures employees can only log attendance for themselves.
+        Always uses server time for security.
         """
         user = self.request.user
+        
+        local_time = timezone.localtime(timezone.now())
+        
+        secure_data = {
+            'date': local_time.date(),
+            'clock_in': local_time.time(),
+            'status': 'Present'
+        }
+
         if user.role == 'Employee':
-            serializer.save(employee=user.employee_profile)
+            serializer.save(employee=user.employee_profile, **secure_data)
         else:
-            serializer.save()
+            serializer.save(**secure_data)
 
     @extend_schema(
         summary="Clock-Out", 
@@ -154,8 +164,9 @@ class AttendanceViewSet(HRBaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        today = timezone.now().date()
-        current_time = timezone.now().time()
+        local_time = timezone.localtime(timezone.now())
+        today = local_time.date()
+        current_time = local_time.time()
 
         attendance = Attendance.objects.filter(
             employee=user.employee_profile, 
@@ -181,14 +192,18 @@ class AttendanceViewSet(HRBaseViewSet):
             {"detail": "Clock-out recorded successfully.", "clock_out": current_time}, 
             status=status.HTTP_200_OK
         )
+
 class LeaveTypeViewSet(HRBaseViewSet):
     queryset = LeaveType.objects.all()
     serializer_class = serializers.LeaveTypeSerializer
     filterset_fields = ['is_paid']
     search_fields = ['name']
-     
-    pagination_class = None  # Disable pagination for LeaveType
+    pagination_class = None 
 
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated()]
+        return super().get_permissions()
 
 @extend_schema_view(
     create=extend_schema(
@@ -225,16 +240,22 @@ class LeaveRequestViewSet(HRBaseViewSet):
         return queryset.filter(employee__user=user)
         
     def perform_create(self, serializer):
-        """
-        Overrides the default save method to inject the employee instance.
-        Prevents regular employees from submitting leaves for other colleagues.
-        """
-        user = self.request.user
-        
-        if user.role == 'Employee':
-            serializer.save(employee=user.employee_profile)
-        else:
-            serializer.save()
+            """
+            اگر کارمند درخواست مرخصی داد:
+                -> آیدی خودش به عنوان درخواست‌دهنده ثبت میشه.
+            اگر مدیر (HR) درخواست رو ثبت کرد:
+                -> اگر آیدی کارمندی رو فرستاده بود، برای اون ثبت میشه.
+                -> اگر نفرستاده بود، برای خود مدیر ثبت میشه.
+            """
+            user = self.request.user
+            
+            if user.role == 'Employee':
+                serializer.save(employee=user.employee_profile)
+            else:
+                if 'employee' not in self.request.data:
+                    serializer.save(employee=user.employee_profile)
+                else:
+                    serializer.save()
 
     def get_serializer_class(self):
         """
