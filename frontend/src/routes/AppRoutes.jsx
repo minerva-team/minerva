@@ -18,7 +18,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} />
-          <Route path="attendance" element={<AttendanceLeave />} />
+          {/* <Route path="attendance" element={<AttendanceLeave />} /> */}
           <Route path="settings" element={<Setting />} />
         </Route>
       </Route>
