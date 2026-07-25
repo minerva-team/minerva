@@ -138,9 +138,11 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class LeaveRequestEmployeeSerializer(LeaveRequestHRSerializer):
+class LeaveRequestEmployeeSerializer(serializers.ModelSerializer):
     """
-        For employees
+        For Employee
     """
-    class Meta(LeaveRequestHRSerializer.Meta):
-        read_only_fields = ['status', 'approved_by']
+    class Meta:
+        model = LeaveRequest
+        fields = ['id', 'leave_type', 'start_date', 'end_date', 'reason']   
+        read_only_fields = ['employee', 'status', 'approved_by']
