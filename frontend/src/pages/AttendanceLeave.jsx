@@ -25,7 +25,6 @@ export default function AttendanceLeave() {
   const [description, setDescription] = useState('')
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false)
   
-  // استیت لیست مرخصی‌های من
   const [myLeaves, setMyLeaves] = useState([])
 
   const today = new Date().toISOString().split('T')[0]
@@ -60,6 +59,15 @@ export default function AttendanceLeave() {
   const todayAttendance = (attendance?.results || (Array.isArray(attendance) ? attendance : [])).find(
     (record) => record.date === today
   )
+
+  function formatFriendlyDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('fa-IR', {
+      day: 'numeric',
+      month: 'long',
+    }).format(date);
+  }
 
   async function handleClockIn() {
     setIsClockingIn(true)
@@ -331,10 +339,10 @@ export default function AttendanceLeave() {
                   <span className="text-sm font-medium tracking-wide text-white/90">
                     {leave.leave_type_name || 'مرخصی'} 
                   </span>
-                  <div className="flex items-center gap-1.5 font-mono text-xs text-white/40">
-                    <span>{leave.start_date}</span>
+                  <div className="flex items-center gap-1.5 text-xs text-white/50">
+                    <span>{formatFriendlyDate(leave.start_date)}</span>
                     <span className="text-white/20">تا</span>
-                    <span>{leave.end_date}</span>
+                    <span>{formatFriendlyDate(leave.end_date)}</span>
                   </div>
                 </div>
 
