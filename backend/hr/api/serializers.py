@@ -98,19 +98,21 @@ class AttendanceSerializer(serializers.ModelSerializer):
         model = Attendance
         fields = '__all__'
         
-        read_only_fields = ['employee']
+        read_only_fields = ['employee', 'date', 'clock_in', 'clock_out'] 
         
 
     def validate(self, attrs):
         request = self.context.get('request')
-        date = attrs.get('date')
+        
+        from django.utils import timezone
+        today_date = timezone.localtime(timezone.now()).date()
 
         if request and hasattr(request.user, 'employee_profile'):
             employee = request.user.employee_profile
             
-            if Attendance.objects.filter(employee=employee, date=date).exists():
+            if Attendance.objects.filter(employee=employee, date=today_date).exists():
                 raise serializers.ValidationError(
-                    {"date": "Attendance for this date has already been recorded."}
+                    {"detail": "Attendance for today has already been recorded."}
                 )
                 
         return attrs
