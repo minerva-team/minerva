@@ -9,63 +9,61 @@ import gregorian_en from 'react-date-object/locales/gregorian_en'
 import 'react-multi-date-picker/styles/colors/purple.css'
 import 'react-multi-date-picker/styles/backgrounds/bg-dark.css'
 import { getLeaveTypes, submitLeaveRequest } from '@/api/leave'
-
+import { toast } from 'sonner'
 
 export default function AttendanceLeave() {
   const [attendance, setAttendance] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isClockingIn, setIsClockingIn] = useState(false)
   const [isClockingOut, setIsClockingOut] = useState(false)
-  const [error, setError] = useState('')
   const [leaveTypes, setLeaveTypes] = useState([])
   const [selectedLeave, setSelectedLeave] = useState('')
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
   const [description, setDescription] = useState('')
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false)
-  const [leaveMessage, setLeaveMessage] = useState('') 
+
 
   const today = new Date().toISOString().split('T')[0]
 
   useEffect(() => {
-      async function fetchData() {
-        try {
-          const attendanceData = await getAttendance()
-          setAttendance(attendanceData)
-          
-          const typesData = await getLeaveTypes()
-          setLeaveTypes(typesData.results || typesData)
-          if (typesData.length > 0 || typesData.results?.length > 0) {
-            setSelectedLeave(typesData.results ? typesData.results[0].id : typesData[0].id)
-          }
-        } catch (err) {
-          setError(err.message)
-        } finally {
-          setIsLoading(false)
+    async function fetchData() {
+      try {
+        const attendanceData = await getAttendance()
+        setAttendance(attendanceData)
+        
+        const typesData = await getLeaveTypes()
+        setLeaveTypes(typesData.results || typesData)
+        if (typesData.length > 0 || typesData.results?.length > 0) {
+          setSelectedLeave(typesData.results ? typesData.results[0].id : typesData[0].id)
         }
+      } catch (err) {
+        toast.error('خطا در دریافت اطلاعات اولیه.') 
+      } finally {
+        setIsLoading(false)
       }
-      fetchData()
-    }, [])
+    }
+    fetchData()
+  }, [])
 
   const todayAttendance = (attendance?.results || (Array.isArray(attendance) ? attendance : [])).find(
     (record) => record.date === today
   )
 
   async function handleClockIn() {
-    setError('')
     setIsClockingIn(true)
 
     try {
       await clockIn({})
-
       const data = await getAttendance()
       setAttendance(data)
+      toast.success('ورود شما با موفقیت ثبت شد.')
     } catch (err) {
       if (err.response && err.response.data) {
         const errorMessages = Object.values(err.response.data).flat().join(' ')
-        setError(`خطا: ${errorMessages}`)
+        toast.error(`خطا: ${errorMessages}`)
       } else {
-        setError('مشکلی در ثبت ورود پیش آمد.')
+        toast.error('مشکلی در ثبت ورود پیش آمد.')
       }
     } finally {
       setIsClockingIn(false)
@@ -73,20 +71,19 @@ export default function AttendanceLeave() {
   }
 
   async function handleClockOut() {
-    setError('')
     setIsClockingOut(true)
 
     try {
       await clockOut({})
-
       const data = await getAttendance()
       setAttendance(data)
+      toast.success('خروج شما با موفقیت ثبت شد.')
     } catch (err) {
       if (err.response && err.response.data) {
         const errorMessages = Object.values(err.response.data).flat().join(' ')
-        setError(`خطا: ${errorMessages}`)
+        toast.error(`خطا: ${errorMessages}`)
       } else {
-        setError('مشکلی در ثبت خروج پیش آمد. لطفاً دوباره تلاش کنید.')
+        toast.error('مشکلی در ثبت خروج پیش آمد. لطفاً دوباره تلاش کنید.')
       }
     } finally {
       setIsClockingOut(false)
@@ -95,7 +92,6 @@ export default function AttendanceLeave() {
 
   function formatTime(timeValue) {
     if (!timeValue) return '--:--'
-
     try {
       if (typeof timeValue === 'string' && !timeValue.includes('T') && timeValue.includes(':')) {
         const [hours, minutes] = timeValue.split(':')
@@ -109,7 +105,6 @@ export default function AttendanceLeave() {
           hour12: false,
         })
       }
-
       return new Date(timeValue).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -125,35 +120,22 @@ export default function AttendanceLeave() {
     if (record.clock_out) return 'پایان کار'
 
     switch (record.status) {
-      case 'Present':
-        return 'مشغول کار'
-      case 'Absent':
-        return 'غایب'
-      case 'On Leave':
-        return 'در مرخصی'
-      default:
-        return 'ثبت نشده'
+      case 'Present': return 'مشغول کار'
+      case 'Absent': return 'غایب'
+      case 'On Leave': return 'در مرخصی'
+      default: return 'ثبت نشده'
     }
   }
 
   function getStatusColors(record) {
-    if (!record) {
-      return { ping: 'bg-gray-400', dot: 'bg-gray-500' }
-    }
-
-    if (record.clock_out) {
-      return { ping: 'bg-blue-400', dot: 'bg-blue-500' }
-    }
+    if (!record) return { ping: 'bg-gray-400', dot: 'bg-gray-500' }
+    if (record.clock_out) return { ping: 'bg-blue-400', dot: 'bg-blue-500' }
 
     switch (record.status) {
-      case 'Present':
-        return { ping: 'bg-green-400', dot: 'bg-green-500' }
-      case 'Absent':
-        return { ping: 'bg-red-400', dot: 'bg-red-500' }
-      case 'On Leave':
-        return { ping: 'bg-yellow-400', dot: 'bg-yellow-500' }
-      default:
-        return { ping: 'bg-gray-400', dot: 'bg-gray-500' }
+      case 'Present': return { ping: 'bg-green-400', dot: 'bg-green-500' }
+      case 'Absent': return { ping: 'bg-red-400', dot: 'bg-red-500' }
+      case 'On Leave': return { ping: 'bg-yellow-400', dot: 'bg-yellow-500' }
+      default: return { ping: 'bg-gray-400', dot: 'bg-gray-500' }
     }
   }
 
@@ -161,15 +143,15 @@ export default function AttendanceLeave() {
   
   async function handleLeaveSubmit(e) {
     e.preventDefault()
-    setLeaveMessage('')
-    setError('')
 
     if (!startDate || !endDate) {
-      setError('لطفاً تاریخ شروع و پایان را انتخاب کنید.')
+      toast.error('لطفاً تاریخ شروع و پایان را انتخاب کنید.')
       return
     }
 
     setIsSubmittingLeave(true)
+    const toastId = toast.loading('در حال ارسال درخواست...')
+
     try {
       const miladiStart = startDate.convert(gregorian, gregorian_en).format('YYYY-MM-DD')
       const miladiEnd = endDate.convert(gregorian, gregorian_en).format('YYYY-MM-DD')
@@ -181,12 +163,13 @@ export default function AttendanceLeave() {
         reason: description
       })
 
-      setLeaveMessage('درخواست مرخصی شما با موفقیت ثبت شد.')
+      toast.success('درخواست مرخصی با موفقیت ثبت شد.', { id: toastId })
+      
       setStartDate(null)
       setEndDate(null)
       setDescription('')
     } catch (err) {
-      setError(err.message)
+      toast.error('مشکلی در ثبت درخواست پیش آمد.', { id: toastId })
     } finally {
       setIsSubmittingLeave(false)
     }
@@ -208,8 +191,6 @@ export default function AttendanceLeave() {
         {isLoading && (
           <p className="text-sm text-white/50">در حال دریافت اطلاعات حضور...</p>
         )}
-
-        {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
         {!isLoading && (
           <>
@@ -300,8 +281,6 @@ export default function AttendanceLeave() {
             درخواست مرخصی
           </h2>
         </div>
-
-        {leaveMessage && <p className="mb-4 text-sm text-green-400">{leaveMessage}</p>}
 
         <form onSubmit={handleLeaveSubmit} className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
           <div className="flex flex-col gap-2 md:col-span-2">
