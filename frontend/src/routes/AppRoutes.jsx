@@ -4,6 +4,7 @@ import Login from '../pages/Login'
 import DashboardLayout from '../layouts/DashboardLayout'
 import DashboardHome from '../pages/DashboardHome'
 import Setting from '../pages/Settings'
+import AttendanceLeave from '@/pages/AttendanceLeave'
 import NotFound from '../pages/NotFound'
 
 import ProtectedRoute from './ProtectedRoute'

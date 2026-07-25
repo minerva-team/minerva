@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.db import transaction
 from accounts.models import User
 from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
-
+from django.utils import timezone
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
@@ -97,14 +97,31 @@ class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = '__all__'
+        read_only_fields = ['employee']
+        
+        extra_kwargs = {
+            'status': {'required': False},
+            'date': {'required': False},
+            'clock_in': {'required': False},
+            'clock_out': {'required': False},
+        }
 
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Attendance.objects.all(),
-                fields=['employee', 'date'],
-                message="Attendance for this employee on this date has already been recorded."
-            )
-        ]
+    def validate(self, attrs):
+        request = self.context.get('request')
+        
+        date = attrs.get('date')
+        if not date:
+            date = timezone.localtime(timezone.now()).date()
+
+        if request and hasattr(request.user, 'employee_profile'):
+            if request.user.role == 'Employee':
+                employee = request.user.employee_profile
+                if Attendance.objects.filter(employee=employee, date=date).exists():
+                    raise serializers.ValidationError(
+                        {"detail": "ورود شما برای امروز قبلاً ثبت شده است."} 
+                    )
+                
+        return attrs
 
 class LeaveTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -119,6 +136,8 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
         model = LeaveRequest
         fields = '__all__'
 
+    extra_kwargs = {'employee': {'required': False}}
+
     def validate(self, attrs):
         start_date = attrs.get("start_date", self.instance.start_date if self.instance else None)
         end_date = attrs.get("end_date", self.instance.end_date if self.instance else None)
@@ -129,9 +148,11 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class LeaveRequestEmployeeSerializer(LeaveRequestHRSerializer):
+class LeaveRequestEmployeeSerializer(serializers.ModelSerializer):
     """
-        For employees
+        For Employee
     """
-    class Meta(LeaveRequestHRSerializer.Meta):
-        read_only_fields = ['status', 'approved_by']
+    class Meta:
+        model = LeaveRequest
+        fields = ['id', 'leave_type', 'start_date', 'end_date', 'reason']   
+        read_only_fields = ['employee', 'status', 'approved_by']
