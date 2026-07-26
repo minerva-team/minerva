@@ -29,11 +29,27 @@ class Department(BaseModel):
 class Employee(BaseModel):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='employee_profile')
     department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True, blank=True, related_name='employees')
+    job_title = models.CharField(max_length=100, blank=True)
+    reports_to = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="direct_reports")
     employee_code = models.CharField(max_length=20, unique=True)
+    profile_picture = models.ImageField(upload_to="employees/profile_pictures/", blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
     national_id = models.CharField(max_length=10, unique=True)
+    address = models.TextField(blank=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     hire_date = models.DateField()
     is_deleted = models.BooleanField(default=False)
+    
+    GENDER_CHOICES = [
+    ("M", "Male"),
+    ("F", "Female"),
+    ("O", "Other"),
+    ]
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    
+    emergency_contact_name = models.CharField(max_length=100, blank=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True)
+    emergency_contact_relationship = models.CharField(max_length=50, blank=True)
     
     objects = models.Manager()
     active_employees = ActiveEmployeeManager()

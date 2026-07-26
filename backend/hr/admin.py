@@ -8,10 +8,50 @@ class DepartmentAdmin(admin.ModelAdmin):
     
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ['user', 'employee_code', 'national_id', 'is_deleted']
-    search_fields = ['employee_code', 'national_id']
-    list_filter = ['is_deleted', 'department']
+    list_display = ["user", "employee_code", "job_title", "department", "reports_to", "phone", "is_deleted"]
+    search_fields = [ "employee_code", "national_id", "job_title", "user__email", "user__first_name", "user__last_name"]
+    list_filter = [ "department", "gender", "is_deleted", "hire_date"]
+    autocomplete_fields = ["user", "department", "reports_to",]
 
+    fieldsets = (
+        (
+            "Account and Employment",
+            {
+                "fields": (
+                    "user",
+                    "employee_code",
+                    "department",
+                    "job_title",
+                    "reports_to",
+                    "hire_date",
+                    "is_deleted",
+                )
+            },
+        ),
+        (
+            "Personal Information",
+            {
+                "fields": (
+                    "profile_picture",
+                    "national_id",
+                    "gender",
+                    "date_of_birth",
+                    "phone",
+                    "address",
+                )
+            },
+        ),
+        (
+            "Emergency Contact",
+            {
+                "fields": (
+                    "emergency_contact_name",
+                    "emergency_contact_phone",
+                    "emergency_contact_relationship",
+                )
+            },
+        ),
+    )
 @admin.register(ContractType)
 class ContractTypeAdmin(admin.ModelAdmin):
     list_display = ['name', 'created_at']
