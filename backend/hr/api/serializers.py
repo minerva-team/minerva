@@ -3,6 +3,7 @@ from django.db import transaction
 from accounts.models import User
 from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
 from django.utils import timezone
+from hr.models import EmployeeDocument
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
@@ -158,3 +159,15 @@ class LeaveRequestEmployeeSerializer(serializers.ModelSerializer):
         model = LeaveRequest
         fields = ['id', 'leave_type', 'start_date', 'end_date', 'reason']   
         read_only_fields = ['employee', 'status', 'approved_by']
+
+class EmployeeDocumentSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.user.get_full_name', read_only=True)
+    document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
+
+    class Meta:
+        model = EmployeeDocument
+        fields = [
+            'id', 'employee', 'employee_name', 'document_type', 
+            'document_type_display', 'title', 'file', 'created_at'
+        ]
+        extra_kwargs = {'employee': {'required': False}}
