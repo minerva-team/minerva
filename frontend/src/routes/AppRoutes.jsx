@@ -9,7 +9,7 @@ import AttendanceLeave from '@/pages/AttendanceLeave'
 import OrganizationChart from '@/pages/OrganizationChart'
 import ProtectedRoute from './ProtectedRoute'
 import HrLeaveManagement from '../pages/HrLeaveManagement' 
-// import Employee360View from '@/pages/Employee360View' 
+import Employee360View from '@/pages/Employee360View' 
 
 const RequireRole = ({ allowedRoles, children }) => {
   const userRole = localStorage.getItem('userRole') || 'Employee'
@@ -35,7 +35,7 @@ export default function AppRoutes() {
           <Route path="attendance" element={<AttendanceLeave />} />
           <Route path="profile" element={<Profile />} />
           
-          {/* <Route path="employee/:id" element={<Employee360View />} /> */}
+          <Route path="employee/:id" element={<Employee360View />} />
           
           <Route 
             path="org-chart" 
