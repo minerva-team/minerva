@@ -52,6 +52,44 @@ class EmployeeAdmin(admin.ModelAdmin):
             },
         ),
     )
+    
+
+@admin.register(EmployeeDocument)
+class EmployeeDocumentAdmin(admin.ModelAdmin):
+    list_display = ("title", "employee", "document_type", "created_at",)
+    list_filter = ("document_type", "created_at",)
+    search_fields = ("title", "employee__employee_code", "employee__user__email",)
+    autocomplete_fields = ("employee",)
+    readonly_fields = ("created_at", "updated_at",)
+    
+    date_hierarchy = "created_at"
+
+    ordering = ("-created_at",)
+    
+    fieldsets = (
+        (
+            "Document Information",
+            {
+                "fields": (
+                    "employee",
+                    "document_type",
+                    "title",
+                    "file",
+                )
+            },
+        ),
+        (
+            "Metadata",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                ),
+            },
+        ),
+    )
+
 @admin.register(ContractType)
 class ContractTypeAdmin(admin.ModelAdmin):
     list_display = ['name', 'created_at']

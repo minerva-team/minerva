@@ -65,6 +65,27 @@ class Employee(BaseModel):
     def __str__(self):
         return f"{self.user.email} ({self.employee_code})"
 
+class EmployeeDocument(BaseModel):
+    DOCUMENT_TYPE_CHOICES = [
+        ("contract", "Contract"),
+        ("resume", "Resume"),
+        ("identity", "Identity Document"),
+        ("certificate", "Certificate"),
+        ("other", "Other"),
+    ]
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="documents")
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES)
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to="employees/documents/")
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Employee Document"
+        verbose_name_plural = "Employee Documents"
+        
+    def __str__(self):
+        return f"{self.employee.employee_code} - {self.title}"
+    
 class ContractType(BaseModel):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True, null=True)
