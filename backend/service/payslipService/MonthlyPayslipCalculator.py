@@ -1,16 +1,27 @@
-from hr.models import Employee, Attendance
-
 from decimal import Decimal
 from datetime import datetime
 from django.core.exceptions import ValidationError
 from hr.models import Employee, Contract, Attendance
 from payroll.models import PayrollConfig, Payslip
 
-
-class PayrollCalculatorService:
+class MonthlyPayslipCalculator:
 
     @classmethod
     def calculate_for_employee(cls, employee_id: int, year: int, month: int) -> Payslip:
+
+
+        existing_payslip = Payslip.objects.filter(
+            employee_id=employee_id,
+            year=year,
+            month=month
+        ).first()
+
+        if existing_payslip and existing_payslip.status != 'Draft':
+            raise ValidationError(
+                f"فیش حقوقی این ماه برای این کارمند در وضعیت '{existing_payslip.status}' است "
+                "و قابل محاسبه مجدد نیست."
+            )
+
 
         try:
             employee = Employee.objects.select_related('department').get(pk=employee_id, is_deleted=False)
@@ -54,11 +65,11 @@ class PayrollCalculatorService:
         undertime_penalty = Decimal(str(time_stats['undertime_hours'])) * hourly_rate * config.lateness_multiplier
 
         gross_salary = (
-                contract.base_salary +
-                contract.housing_allowance +
-                contract.transport_allowance +
-                overtime_pay -
-                undertime_penalty
+            contract.base_salary +
+            contract.housing_allowance +
+            contract.transport_allowance +
+            overtime_pay -
+            undertime_penalty
         )
 
         gross_salary = max(gross_salary, Decimal('0.00'))
@@ -67,7 +78,8 @@ class PayrollCalculatorService:
         insurance_amount = gross_salary * (config.insurance_rate / Decimal('100.0'))
         net_salary = gross_salary - (tax_amount + insurance_amount)
 
-        payslip, _ = Payslip.objects.update_or_create(
+
+        payslip, created = Payslip.objects.update_or_create(
             employee=employee,
             year=year,
             month=month,
@@ -82,6 +94,7 @@ class PayrollCalculatorService:
             }
         )
 
+       
         return payslip
 
     @staticmethod
