@@ -11,6 +11,7 @@ from drf_spectacular.utils import (  # type: ignore
 )
 from rest_framework import filters, serializers, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,6 +22,7 @@ from hr.models import (
     ContractType,
     Department,
     Employee,
+    EmployeeDocument,
     LeaveRequest,
     LeaveType,
 )
@@ -49,12 +51,40 @@ class DepartmentViewSet(HRBaseViewSet):
 
 
 @extend_schema_view(
-    create=extend_schema(
-        summary="Onboard New Employee",
-        description="Create User account and Employee record simultaneously using atomic transaction.",
-        responses={201: local_serializers.EmployeeListSerializer, 400: OpenApiResponse(description="Validation error")}
+    list=extend_schema(
+        summary="List Active Employees (لیست کارمندان)", 
+        description="دریافت لیست تمامی پرسنل فعال. کارمندانی که حذف منطقی شده‌اند (is_deleted=True) در این لیست نمایش داده نمی‌شوند.",
+        tags=["Employees"]
     ),
-    list=extend_schema(summary="List Active Employees", description="Get list of employees. Deleted employees (is_deleted=True) are not shown.")
+    retrieve=extend_schema(
+        summary="Employee Detail (جزئیات کارمند)",
+        description="دریافت اطلاعات کامل یک کارمند خاص با استفاده از شناسه (ID) آن.",
+        tags=["Employees"]
+    ),
+    create=extend_schema(
+        summary="Onboard New Employee (استخدام کارمند جدید)",
+        description="ساخت همزمان حساب کاربری (User) و پروفایل کارمندی (Employee) در یک تراکنش امن (Atomic Transaction).",
+        responses={
+            201: local_serializers.EmployeeListSerializer, 
+            400: OpenApiResponse(description="خطای اعتبارسنجی داده‌ها (Validation Error)")
+        },
+        tags=["Employees"]
+    ),
+    update=extend_schema(
+        summary="Update Employee (ویرایش کامل)",
+        description="جایگزینی و ویرایش کامل اطلاعات پروفایل یک کارمند.",
+        tags=["Employees"]
+    ),
+    partial_update=extend_schema(
+        summary="Partial Update (ویرایش جزئی)",
+        description="بروزرسانی یک یا چند فیلد خاص از پروفایل کارمند (مثلاً فقط تغییر دپارتمان).",
+        tags=["Employees"]
+    ),
+    destroy=extend_schema(
+        summary="Delete Employee (حذف کارمند)",
+        description="حذف کارمند از سیستم.",
+        tags=["Employees"]
+    )
 )
 class EmployeeViewSet(HRBaseViewSet):
     filterset_fields = ['department']
@@ -67,6 +97,8 @@ class EmployeeViewSet(HRBaseViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return local_serializers.EmployeeRegistrationSerializer
+        elif self.action == 'me':
+            return local_serializers.EmployeeProfileSerializer
         return local_serializers.EmployeeListSerializer
 
     def create(self, request, *args, **kwargs):
@@ -76,6 +108,78 @@ class EmployeeViewSet(HRBaseViewSet):
         output_serializer = local_serializers.EmployeeListSerializer(employee)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
+    # ========================================================
+    # Employee Personal Profile Action
+    # ========================================================
+    @extend_schema(
+        summary="My Profile (پروفایل من)",
+        description="دریافت اطلاعات کامل کاربر لاگین شده (GET) یا آپدیت کردن عکس و اطلاعات شخصی (PATCH).",
+        tags=["Employee Profile"]
+    )
+    @action(
+        detail=False, 
+        methods=['get', 'patch'], 
+        url_path='me',
+        parser_classes=[MultiPartParser, FormParser, JSONParser]
+    )
+    def me(self, request):
+        employee = request.user.employee_profile
+        
+        if request.method == 'GET':
+            serializer = self.get_serializer(employee, context={'request': request})
+            return Response(serializer.data)
+            
+        elif request.method == 'PATCH':
+            serializer = self.get_serializer(
+                employee, 
+                data=request.data, 
+                partial=True, 
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+# ==========================================
+# Employee Document ViewSet
+# ==========================================
+@extend_schema_view(
+    create=extend_schema(
+        summary="Upload Employee Document",
+        description="Upload documents like CV, Identity, etc. Requires multipart/form-data."
+    )
+)
+class EmployeeDocumentViewSet(viewsets.ModelViewSet):
+    """
+    Handles file uploads and CRUD for employee documents.
+    Employees see/manage their own. HR sees all.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = local_serializers.EmployeeDocumentSerializer
+    parser_classes = [MultiPartParser, FormParser] 
+    filterset_fields = ['document_type', 'employee']
+    search_fields = ['title']
+    ordering_fields = ['created_at']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = EmployeeDocument.objects.select_related('employee', 'employee__user').all()
+        
+        if user.role in ['HR Manager', 'Admin']:
+            return queryset
+            
+        return queryset.filter(employee__user=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        
+        if user.role == 'Employee':
+            serializer.save(employee=user.employee_profile)
+        else:
+            if 'employee' not in self.request.data:
+                serializer.save(employee=user.employee_profile)
+            else:
+                serializer.save()
 
 @extend_schema_view(
     list=extend_schema(
