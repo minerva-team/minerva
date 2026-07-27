@@ -8,8 +8,8 @@ import NotFound from '../pages/NotFound'
 import AttendanceLeave from '@/pages/AttendanceLeave'
 import OrganizationChart from '@/pages/OrganizationChart'
 import ProtectedRoute from './ProtectedRoute'
-
 import HrLeaveManagement from '../pages/HrLeaveManagement' 
+// import Employee360View from '@/pages/Employee360View' 
 
 const RequireRole = ({ allowedRoles, children }) => {
   const userRole = localStorage.getItem('userRole') || 'Employee'
@@ -33,11 +33,19 @@ export default function AppRoutes() {
           <Route index element={<DashboardHome />} />
           
           <Route path="attendance" element={<AttendanceLeave />} />
-          
           <Route path="profile" element={<Profile />} />
-          <Route path="org-chart" element={<OrganizationChart />} />
           
-          {/* HR Leave Management route with role-based access */}  
+          {/* <Route path="employee/:id" element={<Employee360View />} /> */}
+          
+          <Route 
+            path="org-chart" 
+            element={
+              <RequireRole allowedRoles={['HR Manager', 'Admin']}>
+                <OrganizationChart />
+              </RequireRole>
+            } 
+          />
+          
           <Route 
             path="hr-leaves" 
             element={
