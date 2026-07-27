@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
-import { Check, X, CheckCircle, FileText, Clock, AlertCircle } from 'lucide-react';
+import { Check, X, CheckCircle, FileText, Clock, AlertCircle, Loader2 } from 'lucide-react';
 
 // ==========================================
-// MOCK DATA (Role-Based Datasets)
+// MOCK DATA (Fallback & Finance)
 // ==========================================
-
 const db = {
-  // Admin Data
   admin: {
     kpis: [
       { label: 'سود خالص این ماه (تومان)', value: '۸۵۰,۰۰۰,۰۰۰', color: 'text-green-400' },
@@ -31,8 +29,6 @@ const db = {
       { id: 2, title: 'تخصیص بودجه پاداش فصلی', subtitle: 'مبلغ کل: ۲۰۰ میلیون تومان' },
     ]
   },
-
-  // HR Manager Data
   hr: {
     kpis: [
       { label: 'پرسنل فعال', value: '۱۴۲', color: 'text-white/90' },
@@ -56,8 +52,6 @@ const db = {
       { id: 2, title: 'تایید اضافه‌کار بخش پشتیبانی', subtitle: 'مجموعاً ۴۵ ساعت' },
     ]
   },
-
-  // Finance Manager Data
   finance: {
     kpis: [
       { label: 'هزینه‌های ماه جاری (تومان)', value: '۱۲۵,۰۰۰,۰۰۰', color: 'text-rose-400' },
@@ -81,8 +75,6 @@ const db = {
       { id: 2, title: 'درخواست شارژ تنخواه‌گردان', subtitle: 'بخش فنی - ۵ میلیون تومان' },
     ]
   },
-
-  // Employee Data
   employee: {
     kpis: [
       { label: 'مرخصی باقیمانده', value: '۱۲ روز', color: 'text-white/90' },
@@ -108,9 +100,6 @@ const db = {
   }
 };
 
-// ==========================================
-// CUSTOM CHART TOOLTIP
-// ==========================================
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -129,20 +118,100 @@ const CustomTooltip = ({ active, payload, label }) => {
 // MAIN COMPONENT
 // ==========================================
 export default function DashboardHome() {
+  const userRole = localStorage.getItem('userRole') || 'HR Manager'; 
+  
+  const [loading, setLoading] = useState(true);
+  const [roleData, setRoleData] = useState(null);
+  const [actions, setActions] = useState([]);
 
-  const userRole = 'Finance Manager'; 
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      if (userRole === 'Finance Manager') {
+        setRoleData(db.finance);
+        setActions(db.finance.actionData);
+        setLoading(false);
+        return;
+      }
 
-  const roleData = 
-    userRole === 'Admin' ? db.admin : 
-    userRole === 'HR Manager' ? db.hr : 
-    userRole === 'Finance Manager' ? db.finance : 
-    db.employee;
+      try {
+        const token = localStorage.getItem('access');
+        
+        const response = await fetch('http://localhost:8000/api/hr/dashboard/stats/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-  const [actions, setActions] = useState(roleData.actionData);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const apiData = await response.json();
 
-  const handleAction = (id) => {
+        let formattedKpis = [];
+        if (apiData.role === 'Employee') {
+          formattedKpis = [
+            { label: 'مرخصی باقیمانده', value: `${apiData.kpis.remainingLeaveDays} روز`, color: 'text-white/90' },
+            { label: 'مرخصی مصرفی این ماه', value: `${apiData.kpis.usedLeaveDays} روز`, color: 'text-white/90' },
+            { label: 'ساعات اضافه‌کار ماه', value: `${apiData.kpis.overtimeHours} ساعت`, color: 'text-green-400' },
+            { label: 'غیبت‌های ماه', value: apiData.kpis.absencesMonth, color: 'text-rose-400' },
+          ];
+        } else {
+          formattedKpis = [
+            { label: 'پرسنل فعال', value: apiData.kpis.activeEmployees, color: 'text-white/90' },
+            { label: 'حاضرین امروز', value: apiData.kpis.presentToday, color: 'text-green-400' },
+            { label: 'غایبین امروز', value: apiData.kpis.absentToday, color: 'text-rose-400' },
+            { label: 'درخواست‌های باز', value: apiData.kpis.pendingLeaves, color: 'text-white/90' },
+          ];
+        }
+
+        const formattedData = {
+          kpis: formattedKpis,
+          chartLabel: apiData.chartLabel,
+          chartData: apiData.chartData,
+          listTitle: apiData.listTitle,
+          listData: apiData.listData,
+          actionTitle: apiData.actionTitle,
+          actionData: apiData.actionData,
+        };
+
+        setRoleData(formattedData);
+        setActions(formattedData.actionData);
+        setLoading(false);
+
+      } catch (error) {
+        console.error("Failed to fetch API, using mock data as fallback:", error);
+        const fallbackData = userRole === 'Admin' ? db.admin : userRole === 'Employee' ? db.employee : db.hr;
+        setRoleData(fallbackData);
+        setActions(fallbackData.actionData);
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, [userRole]);
+
+  const handleAction = async (id, actionType) => {
     setActions(prev => prev.filter(action => action.id !== id));
+    
+    if (userRole === 'Finance Manager') return; 
+
+    try {
+      const token = localStorage.getItem('access_token');
+      await fetch(`http://localhost:8000/api/hr/leave-requests/${id}/${actionType}/`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (error) {
+      console.error("Action failed", error);
+    }
   };
+
+  if (loading || !roleData) {
+    return (
+      <div className="flex h-[80vh] w-full items-center justify-center text-white/50">
+        <Loader2 className="animate-spin" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6 text-white" dir="rtl">
@@ -257,13 +326,13 @@ export default function DashboardHome() {
                   ) : (
                     <div className="flex items-center gap-2 opacity-80 transition-opacity group-hover:opacity-100">
                       <button 
-                        onClick={() => handleAction(action.id)}
+                        onClick={() => handleAction(action.id, 'approve')}
                         className="flex h-7 w-7 items-center justify-center rounded-full bg-green-500/10 text-green-400 transition-colors hover:bg-green-500/20"
                       >
                         <Check size={14} />
                       </button>
                       <button 
-                        onClick={() => handleAction(action.id)}
+                        onClick={() => handleAction(action.id, 'reject')}
                         className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-500/10 text-rose-400 transition-colors hover:bg-rose-500/20"
                       >
                         <X size={14} />
