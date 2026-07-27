@@ -94,7 +94,7 @@ class MonthlyPayslipCalculator:
             }
         )
 
-       
+
         return payslip
 
     @staticmethod
