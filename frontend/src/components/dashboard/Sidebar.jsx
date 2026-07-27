@@ -9,7 +9,6 @@ import {
 import SidebarItem from './SidebarItem'
 import UserAvatar from '../ui/UserAvatar'
 
-// کارت‌های تستی حذف شدند
 const topMenuItems = [
   {
     title: 'داشبورد',
@@ -35,7 +34,6 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem('access')
-    localStorage.removeItem('access_token') // برای اطمینان هر دو کلید رو پاک میکنیم
     navigate('/login')
   }
   
@@ -46,7 +44,6 @@ export default function Sidebar() {
   )
 
   return (
-    // یه بک‌گراند خیلی تیره و نامحسوس برای کل سایدبار
     <aside className="flex h-screen w-72 flex-col justify-between border-l border-white/[0.04] bg-[#0a0a0a] p-5">
       
       {/* بخش بالا */}
@@ -67,7 +64,6 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* بخش پایین - کاملاً مینیمال و یکپارچه */}
       <div className="flex flex-col gap-1 pt-4 border-t border-white/[0.04]">
         
         {/* لینک پروفایل */}
@@ -85,7 +81,6 @@ export default function Sidebar() {
           <span className="text-sm font-medium tracking-wide">پروفایل من</span>
         </NavLink>
 
-        {/* دکمه خروج */}
         <button
           onClick={handleLogout}
           className="group flex w-full items-center gap-3.5 rounded-xl px-3 py-2.5 text-white/50 transition-all duration-300 hover:bg-rose-500/10 hover:text-rose-400"
