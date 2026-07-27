@@ -15,7 +15,6 @@ class DashboardChartService:
         if user.role == 'Finance Manager':
             return cls._get_finance_chart_data(today, user)
 
-
         elif user.role == 'Employee':
             return cls._get_employee_chart_data(today, user)
 
@@ -105,18 +104,25 @@ class DashboardChartService:
 
         chart_data = []
 
+
+        manager_department = user.employee.department
+
         for i in range(6, -1, -1):
             target_date = today - timedelta(days=i)
             date_str = target_date.strftime("%Y-%m-%d")
 
+
             present_count = Attendance.objects.filter(
                 date=target_date,
-                status='Present'
+                status='Present',
+                employee__department=manager_department
             ).count()
+
 
             absent_count = Attendance.objects.filter(
                 date=target_date,
-                status__in=['Absent']
+                status__in=['Absent', 'Leave'],
+                employee__department=manager_department  
             ).count()
 
             chart_data.append({
