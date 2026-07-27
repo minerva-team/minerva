@@ -6,7 +6,7 @@ import {
   Clock3,
   Calendar,
   CalendarCheck,
-  Settings,
+  User,
   LogOut,
 } from 'lucide-react'
 
@@ -44,9 +44,9 @@ const topMenuItems = [
 
 const bottomMenuItems = [
   {
-    title: 'تنظیمات',
-    to: '/dashboard/settings',
-    icon: Settings,
+    title: 'پروفایل',
+    to: '/dashboard/profile',
+    icon: User,
   },
 ]
 
