@@ -1,25 +1,48 @@
-from rest_framework import viewsets, status, filters
-from rest_framework.response import Response
+from datetime import timedelta
+
+from django.db.models import Count, Q
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
+from drf_spectacular.utils import (  # type: ignore
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
+from rest_framework import filters, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend # type: ignore
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse # type: ignore
-from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
+from hr.models import (
+    Attendance,
+    Contract,
+    ContractType,
+    Department,
+    Employee,
+    LeaveRequest,
+    LeaveType,
+)
+
+from . import serializers as local_serializers
 from .permissions import IsHRManagerRole
-from . import serializers
 
+
+# ==========================================
 # Base ViewSet
+# ==========================================
 class HRBaseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsHRManagerRole]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
 
 
+# ==========================================
 # HR ViewSets
+# ==========================================
 class DepartmentViewSet(HRBaseViewSet):
     queryset = Department.objects.all()
-    serializer_class = serializers.DepartmentSerializer
+    serializer_class = local_serializers.DepartmentSerializer
     filterset_fields = ['name']
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at']
@@ -29,7 +52,7 @@ class DepartmentViewSet(HRBaseViewSet):
     create=extend_schema(
         summary="Onboard New Employee",
         description="Create User account and Employee record simultaneously using atomic transaction.",
-        responses={201: serializers.EmployeeListSerializer, 400: OpenApiResponse(description="Validation error")}
+        responses={201: local_serializers.EmployeeListSerializer, 400: OpenApiResponse(description="Validation error")}
     ),
     list=extend_schema(summary="List Active Employees", description="Get list of employees. Deleted employees (is_deleted=True) are not shown.")
 )
@@ -43,14 +66,14 @@ class EmployeeViewSet(HRBaseViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return serializers.EmployeeRegistrationSerializer
-        return serializers.EmployeeListSerializer
+            return local_serializers.EmployeeRegistrationSerializer
+        return local_serializers.EmployeeListSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         employee = serializer.save()
-        output_serializer = serializers.EmployeeListSerializer(employee)
+        output_serializer = local_serializers.EmployeeListSerializer(employee)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -82,7 +105,7 @@ class EmployeeViewSet(HRBaseViewSet):
 )
 class ContractTypeViewSet(HRBaseViewSet):
     queryset = ContractType.objects.all()
-    serializer_class = serializers.ContractTypeSerializer
+    serializer_class = local_serializers.ContractTypeSerializer
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']    
 
@@ -96,7 +119,7 @@ class ContractTypeViewSet(HRBaseViewSet):
 )
 class ContractViewSet(HRBaseViewSet):
     queryset = Contract.objects.select_related('employee', 'employee__user', 'contract_type').all()
-    serializer_class = serializers.ContractSerializer
+    serializer_class = local_serializers.ContractSerializer
     filterset_fields = ['employee', 'is_active', 'contract_type']
     ordering_fields = ['start_date', 'base_salary']
 
@@ -114,7 +137,7 @@ class AttendanceViewSet(HRBaseViewSet):
     Employees can only view their own attendance records. HR has full access.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = serializers.AttendanceSerializer
+    serializer_class = local_serializers.AttendanceSerializer
     filterset_fields = ['status', 'date']
     ordering_fields = ['date']
 
@@ -136,7 +159,6 @@ class AttendanceViewSet(HRBaseViewSet):
         Always uses server time for security.
         """
         user = self.request.user
-        
         local_time = timezone.localtime(timezone.now())
         
         secure_data = {
@@ -193,9 +215,10 @@ class AttendanceViewSet(HRBaseViewSet):
             status=status.HTTP_200_OK
         )
 
+
 class LeaveTypeViewSet(HRBaseViewSet):
     queryset = LeaveType.objects.all()
-    serializer_class = serializers.LeaveTypeSerializer
+    serializer_class = local_serializers.LeaveTypeSerializer
     filterset_fields = ['is_paid']
     search_fields = ['name']
     pagination_class = None 
@@ -205,14 +228,13 @@ class LeaveTypeViewSet(HRBaseViewSet):
             return [IsAuthenticated()]
         return super().get_permissions()
 
+
 @extend_schema_view(
     create=extend_schema(
         summary="Submit Leave Request",
         description="Statuses include Pending, Approved, Rejected. System checks that end date is not before start date."
     )
 )
-
-
 class LeaveRequestViewSet(HRBaseViewSet):
     """
     Handles CRUD operations for Leave Requests.
@@ -229,7 +251,6 @@ class LeaveRequestViewSet(HRBaseViewSet):
         HR/Admins see all records. Employees see only their own.
         """
         user = self.request.user
-        
         queryset = LeaveRequest.objects.select_related(
             'employee', 'employee__user', 'leave_type', 'approved_by', 'approved_by__user'
         ).all()
@@ -240,30 +261,222 @@ class LeaveRequestViewSet(HRBaseViewSet):
         return queryset.filter(employee__user=user)
         
     def perform_create(self, serializer):
-            """
-            اگر کارمند درخواست مرخصی داد:
-                -> آیدی خودش به عنوان درخواست‌دهنده ثبت میشه.
-            اگر مدیر (HR) درخواست رو ثبت کرد:
-                -> اگر آیدی کارمندی رو فرستاده بود، برای اون ثبت میشه.
-                -> اگر نفرستاده بود، برای خود مدیر ثبت میشه.
-            """
-            user = self.request.user
-            
-            if user.role == 'Employee':
+        """
+        Assigns employee instance automatically based on who is logged in.
+        """
+        user = self.request.user
+        
+        if user.role == 'Employee':
+            serializer.save(employee=user.employee_profile)
+        else:
+            if 'employee' not in self.request.data:
                 serializer.save(employee=user.employee_profile)
             else:
-                if 'employee' not in self.request.data:
-                    serializer.save(employee=user.employee_profile)
-                else:
-                    serializer.save()
+                serializer.save()
 
     def get_serializer_class(self):
         """
         Dynamically assigns a serializer based on the user's role.
-        Employees get a restricted form, HR gets full access.
         """
         if self.request.user and self.request.user.is_authenticated:
             if self.request.user.role in ['HR Manager', 'Admin']:
-                return serializers.LeaveRequestHRSerializer
+                return local_serializers.LeaveRequestHRSerializer
                 
-        return serializers.LeaveRequestEmployeeSerializer
+        return local_serializers.LeaveRequestEmployeeSerializer
+
+    # ========================================================
+    # Added actions for Appoving and Rejecting leaves directly
+    # ========================================================
+    @extend_schema(summary="Approve Leave Request")
+    @action(detail=True, methods=['post'], url_path='approve')
+    def approve_leave(self, request, pk=None):
+        """
+        Approve a leave request (HR/Admin only)
+        """
+        leave_request = self.get_object()
+        leave_request.status = 'Approved'
+        
+        if hasattr(request.user, 'employee_profile'):
+            leave_request.approved_by = request.user.employee_profile
+        else:
+            leave_request.approved_by = None
+            
+        leave_request.save()
+        return Response({"detail": "مرخصی با موفقیت تایید شد."})
+
+    @extend_schema(summary="Reject Leave Request")
+    @action(detail=True, methods=['post'], url_path='reject')
+    def reject_leave(self, request, pk=None):
+        """
+        Reject a leave request (HR/Admin only)
+        """
+        leave_request = self.get_object()
+        leave_request.status = 'Rejected'
+        
+        if hasattr(request.user, 'employee_profile'):
+            leave_request.approved_by = request.user.employee_profile
+        else:
+            leave_request.approved_by = None
+            
+        leave_request.save()
+        return Response({"detail": "مرخصی رد شد."})
+
+
+# ==========================================
+# BFF API for Dashboard
+# ==========================================
+class DashboardStatsAPIView(APIView):
+    """
+    Dashboard Aggregation API
+    Returns tailored data based on the requesting user's role.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Get Dashboard Statistics",
+        description="Returns KPIs, chart data, and action items tailored to the user's role (Admin/HR vs Employee).",
+        responses={
+            200: inline_serializer(
+                name='DashboardResponse',
+                fields={
+                    'role': serializers.CharField(),
+                    'kpis': serializers.DictField(),
+                    'chartLabel': serializers.CharField(),
+                    'chartData': serializers.ListField(),
+                    'listTitle': serializers.CharField(),
+                    'listData': serializers.ListField(),
+                    'actionTitle': serializers.CharField(),
+                    'actionData': serializers.ListField(),
+                }
+            )
+        }
+    )
+    def get(self, request):
+        user = request.user
+        local_time = timezone.localtime(timezone.now())
+        today = local_time.date()
+
+        # Helper mapping for Persian weekdays
+        persian_weekdays = {
+            5: 'شنبه', 6: 'یکشنبه', 0: 'دوشنبه', 
+            1: 'سه‌شنبه', 2: 'چهارشنبه', 3: 'پنجشنبه', 4: 'جمعه'
+        }
+
+        # ------------------------------------------
+        # ADMIN & HR MANAGER VIEW
+        # ------------------------------------------
+        if user.role in ['HR Manager', 'Admin']:
+            active_employees_count = Employee.active_employees.count()
+            
+            present_today_count = Attendance.objects.filter(
+                date=today, 
+                clock_in__isnull=False
+            ).count()
+            
+            pending_leaves_count = LeaveRequest.objects.filter(status='Pending').count()
+
+            chart_data = []
+            for i in range(6, -1, -1):
+                d = today - timedelta(days=i)
+                day_present_count = Attendance.objects.filter(date=d, clock_in__isnull=False).count()
+                chart_data.append({
+                    "name": persian_weekdays[d.weekday()],
+                    "value": day_present_count
+                })
+
+            present_employee_ids = Attendance.objects.filter(date=today).values_list('employee_id', flat=True)
+            absentees = Employee.active_employees.exclude(id__in=present_employee_ids)[:5] 
+            
+            list_data = []
+            for emp in absentees:
+                list_data.append({
+                    "id": emp.id,
+                    "title": emp.user.get_full_name() or emp.user.email,
+                    "type": "غیبت",
+                    "isAlert": True,
+                    "isFile": False
+                })
+
+            pending_requests = LeaveRequest.objects.filter(status='Pending').select_related('employee', 'employee__user', 'leave_type')[:3]
+            action_data = []
+            for req in pending_requests:
+                action_data.append({
+                    "id": req.id,
+                    "title": f"مرخصی {req.employee.user.get_full_name()}",
+                    "subtitle": f"{req.leave_type.name} - از {req.start_date}",
+                    "isPending": True
+                })
+
+            return Response({
+                "role": user.role,
+                "kpis": {
+                    "activeEmployees": active_employees_count,
+                    "presentToday": present_today_count,
+                    "absentToday": active_employees_count - present_today_count,
+                    "pendingLeaves": pending_leaves_count,
+                },
+                "chartLabel": "روند حضور پرسنل ۷ روز گذشته",
+                "chartData": chart_data,
+                "listTitle": "وضعیت غایبین امروز",
+                "listData": list_data,
+                "actionTitle": "تاییدات فوری پرسنلی",
+                "actionData": action_data,
+            }, status=status.HTTP_200_OK)
+
+        # ------------------------------------------
+        # EMPLOYEE VIEW
+        # ------------------------------------------
+        elif user.role == 'Employee':
+            if not hasattr(user, 'employee_profile'):
+                return Response({"detail": "پروفایل کارمندی یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            employee = user.employee_profile
+            
+            used_leaves = LeaveRequest.objects.filter(
+                employee=employee,
+                status='Approved'
+            ).count()
+
+            absences = Attendance.objects.filter(
+                employee=employee,
+                status='Absent',
+                date__month=today.month
+            ).count()
+
+            chart_data = []
+            for i in range(6, -1, -1):
+                d = today - timedelta(days=i)
+                is_present = Attendance.objects.filter(employee=employee, date=d, clock_in__isnull=False).exists()
+                chart_data.append({
+                    "name": persian_weekdays[d.weekday()],
+                    "value": 1 if is_present else 0
+                })
+
+            recent_requests = LeaveRequest.objects.filter(employee=employee).order_by('-created_at')[:3]
+            action_data = []
+            for req in recent_requests:
+                status_fa = 'در انتظار' if req.status == 'Pending' else 'تایید شده' if req.status == 'Approved' else 'رد شده'
+                action_data.append({
+                    "id": req.id,
+                    "title": f"درخواست مرخصی {req.leave_type.name}",
+                    "subtitle": f"وضعیت: {status_fa}",
+                    "isPending": req.status == 'Pending'
+                })
+
+            return Response({
+                "role": user.role,
+                "kpis": {
+                    "usedLeaveDays": used_leaves,
+                    "remainingLeaveDays": 15 - used_leaves,
+                    "absencesMonth": absences,
+                    "overtimeHours": 0, 
+                },
+                "chartLabel": "وضعیت حضور شما (۷ روز گذشته)",
+                "chartData": chart_data,
+                "listTitle": "فیش‌های حقوقی اخیر",
+                "listData": [], 
+                "actionTitle": "پیگیری درخواست‌های من",
+                "actionData": action_data,
+            }, status=status.HTTP_200_OK)
+
+        return Response({"detail": "دسترسی مجاز نیست."}, status=status.HTTP_403_FORBIDDEN)
