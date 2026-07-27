@@ -3,9 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from '../pages/Login'
 import DashboardLayout from '../layouts/DashboardLayout'
 import DashboardHome from '../pages/DashboardHome'
-import Setting from '../pages/Settings'
-import AttendanceLeave from '@/pages/AttendanceLeave'
+import Profile from '../pages/Profile'
 import NotFound from '../pages/NotFound'
+import AttendanceLeave from '@/pages/AttendanceLeave'
+
 import ProtectedRoute from './ProtectedRoute'
 
 import HrLeaveManagement from '../pages/HrLeaveManagement' 
@@ -33,7 +34,7 @@ export default function AppRoutes() {
           
           <Route path="attendance" element={<AttendanceLeave />} />
           
-          <Route path="settings" element={<Setting />} />
+          <Route path="profile" element={<Profile />} />
 
           <Route 
             path="hr-leaves" 

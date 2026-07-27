@@ -1,10 +1,12 @@
+import { useNavigate } from 'react-router-dom'
+
 import {
   LayoutDashboard,
   Wallet,
   Clock3,
   Calendar,
   CalendarCheck,
-  Settings,
+  User,
   LogOut,
 } from 'lucide-react'
 
@@ -42,13 +44,19 @@ const topMenuItems = [
 
 const bottomMenuItems = [
   {
-    title: 'تنظیمات',
-    to: '/dashboard/settings',
-    icon: Settings,
+    title: 'پروفایل',
+    to: '/dashboard/profile',
+    icon: User,
   },
 ]
 
 export default function Sidebar() {
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem('access')
+    navigate('/login')
+  }
   const userRole = localStorage.getItem('userRole') || 'Employee'
 
   // فیلتر کردن هوشمند منوها بر اساس نقش کاربر
@@ -83,7 +91,10 @@ export default function Sidebar() {
           <SidebarItem key={item.title} {...item} />
         ))}
 
-        <button className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-red-400 transition-all duration-200 hover:bg-red-500/20">
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-red-400 transition-all duration-200 hover:bg-red-500/20"
+        >
           <span>خروج</span>
           <LogOut size={20} />
         </button>
