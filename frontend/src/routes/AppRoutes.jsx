@@ -6,7 +6,7 @@ import DashboardHome from '../pages/DashboardHome'
 import Profile from '../pages/Profile'
 import NotFound from '../pages/NotFound'
 import AttendanceLeave from '@/pages/AttendanceLeave'
-
+import OrganizationChart from '@/pages/OrganizationChart'
 import ProtectedRoute from './ProtectedRoute'
 
 import HrLeaveManagement from '../pages/HrLeaveManagement' 
@@ -35,7 +35,9 @@ export default function AppRoutes() {
           <Route path="attendance" element={<AttendanceLeave />} />
           
           <Route path="profile" element={<Profile />} />
-
+          <Route path="org-chart" element={<OrganizationChart />} />
+          
+          {/* HR Leave Management route with role-based access */}  
           <Route 
             path="hr-leaves" 
             element={
