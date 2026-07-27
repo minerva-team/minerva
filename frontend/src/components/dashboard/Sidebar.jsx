@@ -3,6 +3,7 @@ import {
   Wallet,
   Clock3,
   Calendar,
+  CalendarCheck,
   Settings,
   LogOut,
 } from 'lucide-react'
@@ -31,6 +32,12 @@ const topMenuItems = [
     to: '/dashboard/leave',
     icon: Calendar,
   },
+  {
+    title: 'مدیریت مرخصی‌ها',
+    to: '/dashboard/hr-leaves',
+    icon: CalendarCheck,
+    roles: ['HR Manager', 'Admin'], 
+  },
 ]
 
 const bottomMenuItems = [
@@ -42,6 +49,13 @@ const bottomMenuItems = [
 ]
 
 export default function Sidebar() {
+  const userRole = localStorage.getItem('userRole') || 'Employee'
+
+  // فیلتر کردن هوشمند منوها بر اساس نقش کاربر
+  const visibleTopMenuItems = topMenuItems.filter(
+    (item) => !item.roles || item.roles.includes(userRole)
+  )
+
   return (
     <aside className="flex h-screen w-72 flex-col justify-between border-l border-white/10 bg-backgroundC p-6">
       {/* بالا */}
@@ -57,7 +71,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="space-y-3">
-          {topMenuItems.map((item) => (
+          {visibleTopMenuItems.map((item) => (
             <SidebarItem key={item.title} {...item} />
           ))}
         </nav>
