@@ -1,6 +1,4 @@
-from django.db import models
-from hr.models import Employee, BaseModel
-    
+
 from django.db import models
 from hr.models import Employee, Department, ContractType, BaseModel
     
