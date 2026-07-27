@@ -11,6 +11,7 @@ from drf_spectacular.utils import (  # type: ignore
 )
 from rest_framework import filters, serializers, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,6 +22,7 @@ from hr.models import (
     ContractType,
     Department,
     Employee,
+    EmployeeDocument,
     LeaveRequest,
     LeaveType,
 )
@@ -76,6 +78,47 @@ class EmployeeViewSet(HRBaseViewSet):
         output_serializer = local_serializers.EmployeeListSerializer(employee)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
+
+# ==========================================
+# Employee Document ViewSet
+# ==========================================
+@extend_schema_view(
+    create=extend_schema(
+        summary="Upload Employee Document",
+        description="Upload documents like CV, Identity, etc. Requires multipart/form-data."
+    )
+)
+class EmployeeDocumentViewSet(viewsets.ModelViewSet):
+    """
+    Handles file uploads and CRUD for employee documents.
+    Employees see/manage their own. HR sees all.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = local_serializers.EmployeeDocumentSerializer
+    parser_classes = [MultiPartParser, FormParser] 
+    filterset_fields = ['document_type', 'employee']
+    search_fields = ['title']
+    ordering_fields = ['created_at']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = EmployeeDocument.objects.select_related('employee', 'employee__user').all()
+        
+        if user.role in ['HR Manager', 'Admin']:
+            return queryset
+            
+        return queryset.filter(employee__user=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        
+        if user.role == 'Employee':
+            serializer.save(employee=user.employee_profile)
+        else:
+            if 'employee' not in self.request.data:
+                serializer.save(employee=user.employee_profile)
+            else:
+                serializer.save()
 
 @extend_schema_view(
     list=extend_schema(
