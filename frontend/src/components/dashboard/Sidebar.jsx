@@ -1,14 +1,8 @@
 import { useNavigate, NavLink } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  Clock3,
-  CalendarCheck,
-  LogOut,
-} from 'lucide-react'
+import { LayoutDashboard, Wallet, Clock3, Calendar, CalendarCheck, Network, LogOut, User } from 'lucide-react'
 
 import SidebarItem from './SidebarItem'
 import UserAvatar from '../ui/UserAvatar'
-
 const topMenuItems = [
   {
     title: 'داشبورد',
@@ -27,6 +21,12 @@ const topMenuItems = [
     icon: CalendarCheck,
     roles: ['HR Manager', 'Admin'], 
   },
+  {
+  title: 'ساختار سازمانی',
+  to: '/dashboard/org-chart',
+  icon: Network,
+  roles: ['Admin', 'HR Manager'], 
+},
 ]
 
 export default function Sidebar() {
@@ -46,7 +46,6 @@ export default function Sidebar() {
   return (
     <aside className="flex h-screen w-72 flex-col justify-between border-l border-white/[0.04] bg-[#0a0a0a] p-5">
       
-      {/* بخش بالا */}
       <div>
         <div className="mb-10 mt-2 flex items-center justify-start gap-3 px-3">
           <img
@@ -66,7 +65,6 @@ export default function Sidebar() {
 
       <div className="flex flex-col gap-1 pt-4 border-t border-white/[0.04]">
         
-        {/* لینک پروفایل */}
         <NavLink
           to="/dashboard/profile"
           className={({ isActive }) =>
