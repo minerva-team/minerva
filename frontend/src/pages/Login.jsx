@@ -20,7 +20,7 @@ export default function Login({ className, ...props }) {
 
   const navigate = useNavigate()
   const token = localStorage.getItem('access')
-
+  
   const [step, setStep] = useState(1)
   const [identifier, setIdentifier] = useState('')
   const [otp, setOtp] = useState('')
@@ -57,6 +57,9 @@ export default function Login({ className, ...props }) {
 
       localStorage.setItem('access', data.tokens.access)
       localStorage.setItem('refresh', data.tokens.refresh)
+
+      const userRole = data.user.role
+      localStorage.setItem('userRole', userRole)
 
       navigate('/dashboard')
     } catch (err) {
