@@ -79,7 +79,7 @@ class EmployeeDocumentAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Metadata",
+            "Audit Information",
             {
                 "classes": ("collapse",),
                 "fields": (
