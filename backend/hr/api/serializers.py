@@ -70,6 +70,25 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
             )
         return employee
 
+class EmployeeProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+
+    class Meta:
+        model = Employee
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'employee_code', 
+            'national_id', 'department_name', 'job_title', 
+            'profile_picture', 'date_of_birth', 'gender',
+            'address', 'phone', 'emergency_contact_name', 
+            'emergency_contact_phone', 'hire_date'
+        ]
+        read_only_fields = [
+            'employee_code', 'national_id', 'department_name', 'hire_date', 'job_title'
+        ]
+
 class ContractTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractType
