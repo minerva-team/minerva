@@ -132,6 +132,8 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
     """
         Only for HRmanager
     """
+    employee_name = serializers.CharField(source='employee.user.get_full_name', read_only=True)
+    leave_type_name = serializers.CharField(source='leave_type.name', read_only=True)
     class Meta:
         model = LeaveRequest
         fields = '__all__'

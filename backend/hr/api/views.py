@@ -291,7 +291,7 @@ class LeaveRequestViewSet(HRBaseViewSet):
     @action(detail=True, methods=['post'], url_path='approve')
     def approve_leave(self, request, pk=None):
         """
-        Approve a leave request (HR/Admin only)
+        تایید مرخصی (Approve a leave request - HR/Admin only)
         """
         leave_request = self.get_object()
         leave_request.status = 'Approved'
@@ -308,7 +308,7 @@ class LeaveRequestViewSet(HRBaseViewSet):
     @action(detail=True, methods=['post'], url_path='reject')
     def reject_leave(self, request, pk=None):
         """
-        Reject a leave request (HR/Admin only)
+        رد مرخصی (Reject a leave request - HR/Admin only)
         """
         leave_request = self.get_object()
         leave_request.status = 'Rejected'
