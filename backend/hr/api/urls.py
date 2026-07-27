@@ -10,6 +10,7 @@ router.register(r'contracts', views.ContractViewSet, basename='contract')
 router.register(r'attendance', views.AttendanceViewSet, basename='attendance')
 router.register(r'leave-types', views.LeaveTypeViewSet, basename='leave-type')
 router.register(r'leave-requests', views.LeaveRequestViewSet, basename='leave-request')
+router.register(r'documents', views.EmployeeDocumentViewSet, basename='document')
 
 urlpatterns = [
     path('dashboard/stats/', views.DashboardStatsAPIView.as_view(), name='dashboard-stats'),
