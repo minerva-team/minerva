@@ -16,8 +16,12 @@ class DashboardChartService:
             return cls._get_finance_chart_data(today, user)
 
 
+        elif user.role == 'Employee':
+            return cls._get_employee_chart_data(today, user)
+
         elif user.role == 'HR Manager':
             return cls._get_hr_chart_data(today, user)
+
 
         return []
 
@@ -91,6 +95,34 @@ class DashboardChartService:
                 "date": date_str,
                 "overtime": overtime_hours,
                 "undertime": undertime_hours
+            })
+
+        return chart_data
+
+
+    @classmethod
+    def _get_hr_chart_data(cls, today, user):
+
+        chart_data = []
+
+        for i in range(6, -1, -1):
+            target_date = today - timedelta(days=i)
+            date_str = target_date.strftime("%Y-%m-%d")
+
+            present_count = Attendance.objects.filter(
+                date=target_date,
+                status='Present'
+            ).count()
+
+            absent_count = Attendance.objects.filter(
+                date=target_date,
+                status__in=['Absent']
+            ).count()
+
+            chart_data.append({
+                "date": date_str,
+                "present": present_count,
+                "absent": absent_count
             })
 
         return chart_data
