@@ -1,21 +1,24 @@
-from rest_framework import viewsets, filters, status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.views import APIView
+import weasyprint
 from django.core.exceptions import ValidationError
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
-from drf_spectacular.types import OpenApiTypes
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django_filters.rest_framework import DjangoFilterBackend
-
-from .serializers import PayrollConfigSerializer, PayslipSerializer
-from payroll.models import PayrollConfig, Payslip
-from .permissions import IsFinanceManager, IsOwnerOrFinanceManager
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from hr.api.pagination import StandardResultsSetPagination
-
-# ایمپورت سرویس‌های سیستم مینروا
-from service.payslipService.MonthlyPayslipCalculator import MonthlyPayslipCalculator
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from service.paymentService.PayslipPayment import PayslipPaymentService
 from service.payrollService.PayrollReportService import PayrollReportService
+from service.payslipService.MonthlyPayslipCalculator import MonthlyPayslipCalculator
+
+from payroll.models import PayrollConfig, Payslip
+
+from .permissions import IsFinanceManager, IsOwnerOrFinanceManager
+from .serializers import PayrollConfigSerializer, PayslipSerializer
+
 
 # ==========================================
 # 1. Payroll Config API
