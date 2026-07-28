@@ -37,7 +37,6 @@ export default function FinanceControlCenter() {
       } else if (actionType === 'pay') {
         await payPayslip(id, { category_id: 1, description: 'پرداخت حقوق ماهانه' });
       }
-      
       await fetchAllPayslips();
     } catch (error) {
       console.error("عملیات با خطا مواجه شد:", error);
@@ -54,7 +53,9 @@ export default function FinanceControlCenter() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Minerva_Payslip_${year}_${MONTH_NAMES[month] || month}.pdf`);
+      // تبدیل سال میلادی به شمسی در نام فایل دانلودی
+      const shamsiYear = year > 1900 ? year - 621 : year;
+      link.setAttribute('download', `Minerva_Payslip_${shamsiYear}_${MONTH_NAMES[month] || month}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -66,7 +67,10 @@ export default function FinanceControlCenter() {
     }
   };
 
-  const totalPayroll = payslips.reduce((acc, curr) => acc + (Number(curr.net_salary) || 0), 0);
+  // محاسبه هوشمند KPI ها و حذف اعشارها با Math.round
+  const totalPayroll = Math.round(
+    payslips.reduce((acc, curr) => acc + (Number(curr.net_salary) || 0), 0)
+  );
   const pendingCount = payslips.filter(p => p.status === 'Draft' || p.status === 'Approved').length;
   
   const getStatusBadge = (status) => {
@@ -79,8 +83,8 @@ export default function FinanceControlCenter() {
   };
 
   const filteredPayslips = payslips.filter(p => 
-    p.employee_name?.includes(searchTerm) || 
-    p.employee_code?.includes(searchTerm)
+    p.employee_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    p.employee_code?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -96,11 +100,15 @@ export default function FinanceControlCenter() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2 rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 backdrop-blur-xl">
           <span className="font-medium text-xs text-white/40">مجموع پرداختی کل اسناد</span>
-          <span className="text-2xl font-bold text-white">{totalPayroll.toLocaleString('fa-IR')} <span className="font-normal text-sm text-white/30">تومان</span></span>
+          <span className="text-2xl font-bold text-white">
+            {totalPayroll.toLocaleString('fa-IR')} <span className="font-normal text-sm text-white/30">تومان</span>
+          </span>
         </div>
         <div className="flex flex-col gap-2 rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 backdrop-blur-xl">
           <span className="font-medium text-xs text-white/40">فیش‌های در انتظار پرداخت</span>
-          <span className="text-2xl font-bold text-amber-400">{pendingCount} <span className="font-normal text-sm text-white/30">سند</span></span>
+          <span className="text-2xl font-bold text-amber-400">
+            {pendingCount} <span className="font-normal text-sm text-white/30">سند</span>
+          </span>
         </div>
       </div>
 
@@ -134,49 +142,62 @@ export default function FinanceControlCenter() {
                 <tr><td colSpan="5" className="p-8 text-center"><Loader2 className="mx-auto animate-spin text-white/20" /></td></tr>
               ) : filteredPayslips.length === 0 ? (
                 <tr><td colSpan="5" className="p-8 text-center text-white/40">موردی یافت نشد.</td></tr>
-              ) : filteredPayslips.map((row) => (
-                <tr key={row.id} className="transition-colors hover:bg-white/[0.02]">
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-white/90">{row.employee_name || 'نامشخص'}</span>
-                      <span className="text-[11px] text-white/40">{row.employee_code || `ID: ${row.employee}`}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-white/70">{MONTH_NAMES[row.month]} {row.year}</td>
-                  <td className="px-6 py-4 font-mono font-medium text-white/90">{Number(row.net_salary).toLocaleString('fa-IR')}</td>
-                  <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      {row.status === 'Draft' && (
+              ) : filteredPayslips.map((row) => {
+                
+                // تبدیل سال میلادی به شمسی
+                const shamsiYear = row.year > 1900 ? row.year - 621 : row.year;
+                
+                // حذف اعشار از مبلغ
+                const cleanSalary = Math.round(Number(row.net_salary));
+
+                return (
+                  <tr key={row.id} className="transition-colors hover:bg-white/[0.02]">
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-white/90">{row.employee_name || 'کاربر بدون نام'}</span>
+                        <span className="text-[11px] text-white/40">{row.employee_code || `ID: ${row.employee}`}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-white/70">
+                      {MONTH_NAMES[row.month]} {shamsiYear}
+                    </td>
+                    <td className="px-6 py-4 font-mono font-medium text-white/90">
+                      {cleanSalary.toLocaleString('fa-IR')}
+                    </td>
+                    <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        {row.status === 'Draft' && (
+                          <button 
+                            onClick={() => handleAction('approve', row.id)}
+                            disabled={actionLoading !== null}
+                            className="rounded-lg bg-blue-500/10 px-3 py-1.5 font-medium text-[11px] text-blue-400 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
+                          >
+                            {actionLoading === `approve-${row.id}` ? '...' : 'تایید مدیر'}
+                          </button>
+                        )}
+                        {row.status === 'Approved' && (
+                          <button 
+                            onClick={() => handleAction('pay', row.id)}
+                            disabled={actionLoading !== null}
+                            className="flex items-center gap-1 rounded-lg bg-emerald-500/10 px-3 py-1.5 font-medium text-[11px] text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                          >
+                            <DollarSign size={14} />
+                            {actionLoading === `pay-${row.id}` ? '...' : 'ثبت پرداخت'}
+                          </button>
+                        )}
                         <button 
-                          onClick={() => handleAction('approve', row.id)}
-                          disabled={actionLoading !== null}
-                          className="rounded-lg bg-blue-500/10 px-3 py-1.5 font-medium text-[11px] text-blue-400 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
+                          onClick={() => handleDownloadPDF(row.id, row.year, row.month)}
+                          disabled={actionLoading === `download-${row.id}`}
+                          className="rounded-lg border border-white/[0.04] p-1.5 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white disabled:opacity-50"
                         >
-                          {actionLoading === `approve-${row.id}` ? '...' : 'تایید مدیر'}
+                          {actionLoading === `download-${row.id}` ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                         </button>
-                      )}
-                      {row.status === 'Approved' && (
-                        <button 
-                          onClick={() => handleAction('pay', row.id)}
-                          disabled={actionLoading !== null}
-                          className="flex items-center gap-1 rounded-lg bg-emerald-500/10 px-3 py-1.5 font-medium text-[11px] text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
-                        >
-                          <DollarSign size={14} />
-                          {actionLoading === `pay-${row.id}` ? '...' : 'ثبت پرداخت'}
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => handleDownloadPDF(row.id, row.year, row.month)}
-                        disabled={actionLoading === `download-${row.id}`}
-                        className="rounded-lg border border-white/[0.04] p-1.5 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white disabled:opacity-50"
-                      >
-                        {actionLoading === `download-${row.id}` ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
