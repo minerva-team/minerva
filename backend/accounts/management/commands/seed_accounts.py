@@ -6,8 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 import random
 
-fake = Faker()
-
+fake = Faker('fa_IR')
 
 class Command(BaseCommand):
     help = "Seed users and OTP data (safe to run multiple times)"
@@ -20,8 +19,6 @@ class Command(BaseCommand):
 
         roles = ['Admin', 'HR Manager', 'Finance Manager', 'Employee']
 
-        # Load what's already in the DB so re-running the command
-        # never collides with previously seeded rows.
         existing_emails = set(User.objects.values_list('email', flat=True))
         existing_phones = set(
             User.objects.exclude(phone_number__isnull=True).values_list('phone_number', flat=True)
@@ -31,14 +28,12 @@ class Command(BaseCommand):
             users = []
 
             for _ in range(count):
-                # unique email
                 while True:
-                    email = fake.unique.email()
+                    email = Faker('en_US').unique.email()
                     if email not in existing_emails:
                         existing_emails.add(email)
                         break
 
-                # unique phone number (own generator, since msisdn()[:11] can collide after truncation)
                 while True:
                     phone_number = "09" + "".join(random.choices("0123456789", k=9))
                     if phone_number not in existing_phones:
@@ -50,6 +45,8 @@ class Command(BaseCommand):
                     password="password123",
                     role=random.choice(roles),
                     phone_number=phone_number,
+                    first_name=fake.first_name(),
+                    last_name=fake.last_name(),
                 )
 
                 users.append(user)
