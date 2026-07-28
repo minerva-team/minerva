@@ -6,7 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# نصب پکیج‌های لینوکسی مورد نیاز برای WeasyPrint و فونت‌های فارسی
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-cffi \
