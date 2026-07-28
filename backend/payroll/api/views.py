@@ -154,10 +154,11 @@ class PayslipViewSet(viewsets.ModelViewSet):
 
         response = HttpResponse(pdf_file, content_type='application/pdf')
         
-        response['Content-Disposition'] = f'attachment; filename="Minerva_Payslip_{payslip.year}_{payslip.month}.pdf"'
+        response['Content-Disposition'] = f'inline; filename="Minerva_Payslip_{payslip.year}_{payslip.month}.pdf"'
+        
+        response['Access-Control-Expose-Headers'] = 'Content-Disposition'
         
         return response
-
 
 # ==========================================
 # 3. Reports API (Standalone APIView)
