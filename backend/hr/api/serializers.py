@@ -11,12 +11,19 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class EmployeeListSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True)
     phone_number = serializers.CharField(source='user.phone_number', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     
     class Meta:
         model = Employee
-        fields = ['id', 'email','phone_number' ,'employee_code', 'national_id', 'department', 'department_name', 'hire_date', 'is_deleted']
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'phone_number', 
+            'employee_code', 'national_id', 'department', 'department_name', 
+            'job_title', 'profile_picture', 'hire_date', 'is_deleted'
+        ]
 
 class EmployeeRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
