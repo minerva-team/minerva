@@ -18,8 +18,7 @@ from hr.models import (
     LeaveType,
 )
 
-fake = Faker()
-
+fake = Faker('fa_IR')
 
 class Command(BaseCommand):
     help = "Seed HR app safely (idempotent, constraint-safe, bulk optimized)"
@@ -36,8 +35,13 @@ class Command(BaseCommand):
         emp_count = kwargs['employees']
 
         with transaction.atomic():
-            # 1. Departments
-            department_names = ["IT", "HR", "Finance", "Marketing", "Sales"]
+            department_names = [
+                "توسعه و مهندسی نرم‌افزار", 
+                "منابع انسانی (HR)", 
+                "مالی و حسابداری", 
+                "فروش و بازاریابی", 
+                "عملیات و استراتژی"
+            ]
             departments = [
                 Department.objects.get_or_create(
                     name=name,
@@ -47,11 +51,10 @@ class Command(BaseCommand):
             ]
             self.stdout.write(self.style.SUCCESS("✓ Departments ready"))
 
-            # 2. Contract Types
-            contract_type_names = ["Full-time", "Part-time", "Hourly"]
+            contract_type_names = ["تمام‌وقت (دائم)", "پاره‌وقت", "ساعتی / پروژه‌ای"]
             contract_types = [
                 ContractType.objects.get_or_create(
-                    name=name, defaults={"description": fake.sentence()}
+                    name=name, defaults={"description": "قرارداد استاندارد شرکتی"}
                 )[0]
                 for name in contract_type_names
             ]
@@ -92,50 +95,56 @@ class Command(BaseCommand):
 
             selected_users = available_users[:emp_count]
             employees_to_create = []
+            
+            realistic_job_titles = [
+                "توسعه‌دهنده فرانت‌اند", "برنامه‌نویس بک‌اند", 
+                "مدیر محصول", "مهندس دواپس (DevOps)", 
+                "تیم‌لید فنی", "تحلیل‌گر سیستم", 
+                "کارشناس منابع انسانی", "حسابدار ارشد", 
+                "مدیر استراتژی و برنامه‌ریزی", "طراح ارشد UI/UX"
+            ]
 
             for user in selected_users:
                 national_id = self._generate_unique_value(
                     used_national_ids,
-                    lambda: str(random.randint(1000000000, 9999999999)).zfill(
-                        10
-                    ),
+                    lambda: str(random.randint(1000000000, 9999999999)).zfill(10),
                 )
                 employee_code = self._generate_unique_value(
                     used_employee_codes,
-                    lambda: f"EMP{random.randint(10000, 99999)}",
+                    lambda: f"MNV-{random.randint(1000, 9999)}", 
                 )
 
-                gender = random.choice(["M", "F", "O"])
-                first_name = self._get_first_name(gender)
+                gender = random.choice(["M", "F"])
+                
+                emergency_name = fake.first_name() + " " + fake.last_name()
 
                 employees_to_create.append(
                     Employee(
                         user=user,
                         department=random.choice(departments),
-                        job_title=fake.job(),
+                        job_title=random.choice(realistic_job_titles), 
                         employee_code=employee_code,
                         national_id=national_id,
-                        phone=fake.msisdn()[:15],
+                        phone=user.phone_number,      
                         hire_date=fake.date_between(
                             start_date='-3y', end_date='today'
                         ),
                         is_deleted=False,
                         date_of_birth=fake.date_of_birth(
-                            minimum_age=18, maximum_age=65
+                            minimum_age=22, maximum_age=50
                         ),
                         address=fake.address(),
                         gender=gender,
-                        emergency_contact_name=f"{first_name} {fake.last_name()}",
-                        emergency_contact_phone=fake.msisdn()[:20],
+                        emergency_contact_name=emergency_name,
+                        emergency_contact_phone="09" + "".join(random.choices("0123456789", k=9)),
                         emergency_contact_relationship=random.choice(
-                            ["Parent", "Spouse", "Sibling", "Friend"]
+                            ["پدر", "مادر", "همسر", "برادر", "خواهر"]
                         ),
                     )
                 )
 
             Employee.objects.bulk_create(employees_to_create)
 
-            # Re-fetch active employees to guarantee populated primary keys across all DB engines
             all_active_employees = list(
                 Employee.active_employees.filter(user__in=selected_users)
             )
@@ -145,7 +154,6 @@ class Command(BaseCommand):
                 )
             )
 
-            # 4. Manager Hierarchy
             employees_without_manager = [
                 e for e in all_active_employees if e.reports_to_id is None
             ]
@@ -186,9 +194,9 @@ class Command(BaseCommand):
                 Contract(
                     employee=emp,
                     contract_type=random.choice(contract_types),
-                    base_salary=random.randint(30000, 120000),
-                    housing_allowance=random.randint(1000, 5000),
-                    transport_allowance=random.randint(500, 3000),
+                    base_salary=random.randint(15000000, 80000000), 
+                    housing_allowance=random.randint(1000000, 3000000),
+                    transport_allowance=random.randint(500000, 2000000),
                     start_date=emp.hire_date,
                     is_active=True,
                 )
@@ -203,7 +211,6 @@ class Command(BaseCommand):
                 )
             )
 
-            # 6. Attendance
             window_start = date.today() - timedelta(days=9)
             existing_attendance = set(
                 Attendance.objects.filter(
@@ -222,7 +229,7 @@ class Command(BaseCommand):
 
                     status = random.choices(
                         ["Present", "Absent", "On Leave"],
-                        weights=[0.8, 0.1, 0.1],
+                        weights=[0.85, 0.05, 0.1],
                     )[0]
 
                     clock_in_time, clock_out_time = None, None
@@ -250,11 +257,10 @@ class Command(BaseCommand):
                 )
             )
 
-            # 7. Leave Types
             leave_type_configs = [
-                ("Annual Leave", True),
-                ("Sick Leave", True),
-                ("Unpaid Leave", False),
+                ("مرخصی استحقاقی (سالیانه)", True),
+                ("مرخصی استعلاجی", True),
+                ("مرخصی بدون حقوق", False),
             ]
             leave_types = [
                 LeaveType.objects.get_or_create(
@@ -282,7 +288,7 @@ class Command(BaseCommand):
                     start = fake.date_between(
                         start_date='-30d', end_date='today'
                     )
-                    end = start + timedelta(days=random.randint(1, 5))
+                    end = start + timedelta(days=random.randint(1, 4))
 
                     if (emp.id, start) in existing_leave:
                         continue
@@ -303,7 +309,7 @@ class Command(BaseCommand):
                             start_date=start,
                             end_date=end,
                             status=status,
-                            reason=fake.sentence(),
+                            reason="درخواست مرخصی ثبت شده در سیستم",
                             approved_by=approved_by,
                         )
                     )
@@ -317,14 +323,7 @@ class Command(BaseCommand):
                 )
             )
 
-            # 9. Employee Documents
-            document_type_names = [
-                "contract",
-                "resume",
-                "identity",
-                "certificate",
-                "other",
-            ]
+            document_type_names = ["قرارداد", "رزومه", "مدارک هویتی", "گواهینامه‌ها", "سایر"]
             existing_docs = set(
                 EmployeeDocument.objects.filter(
                     employee__in=all_active_employees
@@ -346,9 +345,9 @@ class Command(BaseCommand):
                     doc = EmployeeDocument(
                         employee=emp,
                         document_type=doc_type,
-                        title=f"{doc_type.title()} - {emp.employee_code}",
+                        title=f"{doc_type} - {emp.employee_code}",
                     )
-                    doc.file.name = f"employees/documents/{emp.employee_code}_{doc_type}.txt"
+                    doc.file.name = f"employees/documents/{emp.employee_code}_{doc_type}.pdf"
                     documents_to_create.append(doc)
 
             EmployeeDocument.objects.bulk_create(
@@ -366,25 +365,13 @@ class Command(BaseCommand):
         )
         self.stdout.write(self.style.SUCCESS("=" * 50))
 
-    def _generate_unique_value(
-        self, used_set, generator_func, max_attempts=100
-    ):
+    def _generate_unique_value(self, used_set, generator_func, max_attempts=100):
         for _ in range(max_attempts):
             value = generator_func()
             if value not in used_set:
                 used_set.add(value)
                 return value
-
-        raise RuntimeError(
-            f"Failed to generate unique value after {max_attempts} attempts."
-        )
-
-    def _get_first_name(self, gender):
-        if gender == "M":
-            return fake.first_name_male()
-        elif gender == "F":
-            return fake.first_name_female()
-        return fake.first_name()
+        raise RuntimeError(f"Failed to generate unique value after {max_attempts} attempts.")
 
     def _generate_work_times(self, day):
         start_hour = random.randint(7, 9)
@@ -401,5 +388,4 @@ class Command(BaseCommand):
         clock_out_dt = clock_in_dt + timedelta(
             hours=8, minutes=random.randint(0, 30)
         )
-
         return clock_in_dt.time(), clock_out_dt.time()
