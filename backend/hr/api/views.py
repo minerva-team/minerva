@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.db.models import Count, Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from pydantic_core import ValidationError  # type: ignore
+from django.core.exceptions import ValidationError
 from drf_spectacular.utils import (  # type: ignore
     OpenApiResponse,
     extend_schema,
