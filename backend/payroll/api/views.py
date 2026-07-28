@@ -140,6 +140,23 @@ class PayslipViewSet(viewsets.ModelViewSet):
             )
         except ValidationError as e:
             return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        summary="Download Payslip PDF",
+        description="Generates and returns an official PDF version of the payslip.",
+    )
+    @action(detail=True, methods=['get'], url_path='download-pdf')
+    def download_pdf(self, request, pk=None):
+        payslip = self.get_object()
+
+        html_string = render_to_string('payroll/payslip_pdf.html', {'payslip': payslip})
+
+        pdf_file = weasyprint.HTML(string=html_string).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        
+        response['Content-Disposition'] = f'attachment; filename="Minerva_Payslip_{payslip.year}_{payslip.month}.pdf"'
+        
+        return response
 
 
 # ==========================================
