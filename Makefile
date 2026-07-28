@@ -29,3 +29,24 @@ logs-api:
 
 logs-front:
 	docker compose logs -f frontend
+
+	
+
+# --- Seed Commands ---
+seed-accounts:
+	docker compose run --rm web python manage.py seed_accounts
+
+seed-hr:
+	docker compose run --rm web python manage.py seed_hr
+
+seed-payroll:
+	docker compose run --rm web python manage.py seed_payroll
+
+seed-finance:
+	docker compose run --rm web python manage.py seed_finance
+
+seed-all:
+	docker compose run --rm web python manage.py seed_accounts
+	docker compose run --rm web python manage.py seed_hr
+	docker compose run --rm web python manage.py seed_payroll
+	docker compose run --rm web python manage.py seed_finance
