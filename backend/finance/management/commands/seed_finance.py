@@ -10,13 +10,10 @@ from faker import Faker
 from payroll.models import Payslip
 from finance.models import Category, Transaction
 
-
-fake = Faker()
-
+fake = Faker('fa_IR')
 
 class Command(BaseCommand):
-    help = "Seed Finance app safely (idempotent)"
-
+    help = "Seed Finance app safely (idempotent, localized for Iran)"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,38 +23,29 @@ class Command(BaseCommand):
             help="Number of demo transactions per non-payroll category"
         )
 
-
     def handle(self, *args, **kwargs):
-
         target_per_category = kwargs["misc_per_category"]
 
-
         with transaction.atomic():
-
-
             # =====================================================
-            # 1. Create / Update Categories
+            # 1. Create / Update Categories (فارسی و سازمانی)
             # =====================================================
-
             categories = {
                 "Income": [
-                    "Salary Income",
-                    "Bonus",
-                    "Other Income",
+                    "درآمد فروش محصولات",
+                    "درآمد ارائه خدمات",
+                    "سایر درآمدهای عملیاتی",
                 ],
-
                 "Expense": [
-                    "Payroll Expense",
-                    "Office Rent",
-                    "Utilities",
+                    "هزینه حقوق و دستمزد",
+                    "اجاره دفتر مرکزی",
+                    "هزینه آب، برق و اینترنت",
+                    "خرید تجهیزات اداری و فنی"
                 ],
             }
 
-
             for category_type, names in categories.items():
-
                 for name in names:
-
                     Category.objects.update_or_create(
                         name=name,
                         defaults={
@@ -65,23 +53,15 @@ class Command(BaseCommand):
                         }
                     )
 
-
-            self.stdout.write(
-                self.style.SUCCESS(
-                    "Categories ready"
-                )
-            )
-
+            self.stdout.write(self.style.SUCCESS("✓ دسته‌بندی‌های مالی ایجاد شدند"))
 
             # =====================================================
             # 2. Create Payroll Transactions
             # =====================================================
-
             payroll_category = Category.objects.get(
-                name="Payroll Expense",
+                name="هزینه حقوق و دستمزد",
                 type="Expense"
             )
-
 
             payslips = list(
                 Payslip.objects
@@ -89,55 +69,30 @@ class Command(BaseCommand):
                 .all()
             )
 
-
             if not payslips:
-
-                self.stdout.write(
-                    self.style.WARNING(
-                        "No payslips found. Run payroll seeder first."
-                    )
-                )
-
+                self.stdout.write(self.style.WARNING("⚠ هیچ فیش حقوقی یافت نشد. ابتدا seeder بخش Payroll را اجرا کنید."))
             else:
-
-
                 existing_transactions = set(
                     Transaction.objects
-                    .filter(
-                        payslip__in=payslips
-                    )
-                    .values_list(
-                        "payslip_id",
-                        flat=True
-                    )
+                    .filter(payslip__in=payslips)
+                    .values_list("payslip_id", flat=True)
                 )
-
 
                 payroll_transactions = []
 
-
                 for payslip in payslips:
-
-
                     if payslip.id in existing_transactions:
                         continue
-
+                    
+                    if payslip.status != 'Paid':
+                        continue
 
                     payroll_transactions.append(
-
                         Transaction(
-
                             category=payroll_category,
-
                             payslip=payslip,
-
                             amount=payslip.net_salary,
-
-                            description=(
-                                f"Salary payment for "
-                                f"{payslip.employee.employee_code}"
-                            ),
-
+                            description=f"پرداخت حقوق پرسنل - {payslip.employee.employee_code}",
                             date=(
                                 payslip.created_at.date()
                                 if hasattr(payslip, "created_at")
@@ -146,122 +101,54 @@ class Command(BaseCommand):
                         )
                     )
 
-
                 if payroll_transactions:
-
-                    Transaction.objects.bulk_create(
-                        payroll_transactions
-                    )
-
+                    Transaction.objects.bulk_create(payroll_transactions)
 
                 self.stdout.write(
-                    self.style.SUCCESS(
-                        f"{len(payroll_transactions)} payroll transactions created"
-                    )
+                    self.style.SUCCESS(f"✓ {len(payroll_transactions)} تراکنش پرداختی حقوق ثبت شد")
                 )
 
-
-
             # =====================================================
-            # 3. Create Demo Transactions
+            # 3. Create Demo Transactions (تراکنش‌های متفرقه)
             # =====================================================
-
-
             demo_categories = Category.objects.filter(
                 name__in=[
-                    "Salary Income",
-                    "Bonus",
-                    "Other Income",
-                    "Office Rent",
-                    "Utilities",
+                    "درآمد فروش محصولات",
+                    "درآمد ارائه خدمات",
+                    "سایر درآمدهای عملیاتی",
+                    "اجاره دفتر مرکزی",
+                    "هزینه آب، برق و اینترنت",
+                    "خرید تجهیزات اداری و فنی"
                 ]
             )
 
-
-
             existing_counts = {
-
                 item["category_id"]: item["count"]
-
                 for item in
                 Transaction.objects
-                .filter(
-                    category__in=demo_categories
-                )
-                .values(
-                    "category_id"
-                )
-                .annotate(
-                    count=Count("id")
-                )
+                .filter(category__in=demo_categories)
+                .values("category_id")
+                .annotate(count=Count("id"))
             }
-
-
 
             demo_transactions = []
 
-
             for category in demo_categories:
-
-
-                current_count = existing_counts.get(
-                    category.id,
-                    0
-                )
-
-
-                required = max(
-                    0,
-                    target_per_category - current_count
-                )
-
+                current_count = existing_counts.get(category.id, 0)
+                required = max(0, target_per_category - current_count)
 
                 for _ in range(required):
-
-
                     if category.type == "Income":
-
-                        amount = (
-                            Decimal(
-                                random.randint(
-                                    50000,
-                                    2000000
-                                )
-                            )
-                            /
-                            Decimal("100")
-                        )
-
-
+                        amount = Decimal(random.randint(50, 500) * 1000000)
                     else:
-
-                        amount = (
-                            Decimal(
-                                random.randint(
-                                    20000,
-                                    800000
-                                )
-                            )
-                            /
-                            Decimal("100")
-                        )
-
-
+                        amount = Decimal(random.randint(2, 50) * 1000000)
 
                     demo_transactions.append(
-
                         Transaction(
-
                             category=category,
-
                             payslip=None,
-
                             amount=amount,
-
-                            description=fake.sentence(
-                                nb_words=6
-                            ),
-
+                            description=fake.text(max_nb_chars=40),
                             date=fake.date_between(
                                 start_date="-180d",
                                 end_date="today"
@@ -269,25 +156,11 @@ class Command(BaseCommand):
                         )
                     )
 
-
-
             if demo_transactions:
-
-                Transaction.objects.bulk_create(
-                    demo_transactions
-                )
-
+                Transaction.objects.bulk_create(demo_transactions)
 
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"{len(demo_transactions)} demo transactions created"
-                )
+                self.style.SUCCESS(f"✓ {len(demo_transactions)} تراکنش مالی فیک ایجاد شد")
             )
 
-
-
-            self.stdout.write(
-                self.style.SUCCESS(
-                    "Finance seeding completed successfully"
-                )
-            )
+            self.stdout.write(self.style.SUCCESS("✅ Seeding بخش مالی با موفقیت به پایان رسید."))

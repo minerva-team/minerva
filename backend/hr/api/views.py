@@ -2,7 +2,8 @@ from datetime import timedelta
 
 from django.db.models import Count, Q
 from django.utils import timezone
-from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
+from django_filters.rest_framework import DjangoFilterBackend
+from django.core.exceptions import ValidationError
 from drf_spectacular.utils import (  # type: ignore
     OpenApiResponse,
     extend_schema,
@@ -29,8 +30,7 @@ from hr.models import (
 
 from . import serializers as local_serializers
 from .permissions import IsHRManagerRole
-
-
+from service.payslipService.MonthlyPayslipCalculator import MonthlyPayslipCalculator
 # ==========================================
 # Base ViewSet
 # ==========================================
@@ -203,6 +203,35 @@ class EmployeeViewSet(HRBaseViewSet):
             "leaves": leaves,
             "attendanceTrend": attendance_trend
         }, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='calculate-payslip')
+    def calculate_payslip(self, request, pk=None):
+        """
+        API برای محاسبه و صدور فیش حقوقی یک کارمند در یک ماه مشخص
+        """
+        year = request.data.get('year')
+        month = request.data.get('month')
+
+        if not year or not month:
+            return Response(
+                {"error": "پارامترهای year و month الزامی هستند."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            payslip = MonthlyPayslipCalculator.calculate_for_employee(
+                employee_id=pk, 
+                year=int(year), 
+                month=int(month)
+            )
+            return Response(
+                {"message": "فیش حقوقی با موفقیت محاسبه و صادر شد.", "payslip_id": payslip.id},
+                status=status.HTTP_201_CREATED
+            )
+        except ValidationError as e:
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ==========================================
 # Employee Document ViewSet

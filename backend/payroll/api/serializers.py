@@ -12,10 +12,17 @@ class PayrollConfigSerializer(serializers.ModelSerializer):
 
 
 class PayslipSerializer(serializers.ModelSerializer):
-    employee_name = serializers.CharField(source='employee.user.email', read_only=True)
+    employee_name = serializers.SerializerMethodField()
     employee_code = serializers.CharField(source='employee.employee_code', read_only=True)
 
     class Meta:
         model = Payslip
         fields = '__all__'
-        read_only_fields = ['created_at', 'updated_at']
+
+    def get_employee_name(self, obj):
+        first_name = obj.employee.user.first_name
+        last_name = obj.employee.user.last_name
+        
+        if first_name or last_name:
+            return f"{first_name} {last_name}".strip()
+        return "کاربر بدون نام"
