@@ -310,11 +310,11 @@ class AttendanceViewSet(HRBaseViewSet):
     ordering_fields = ['date']
 
     def get_queryset(self):
-        """
-        Filters attendance data. HR sees all, employees see only their own.
-        """
         user = self.request.user
         queryset = Attendance.objects.select_related('employee', 'employee__user').all()
+        
+        if self.request.query_params.get('my_records') == 'true':
+            return queryset.filter(employee__user=user)
         
         if user.role in ['HR Manager', 'Admin']:
             return queryset
@@ -335,10 +335,10 @@ class AttendanceViewSet(HRBaseViewSet):
             'status': 'Present'
         }
 
-        if user.role == 'Employee':
-            serializer.save(employee=user.employee_profile, **secure_data)
-        else:
+        if user.role in ['HR Manager', 'Admin'] and 'employee' in self.request.data:
             serializer.save(**secure_data)
+        else:
+            serializer.save(employee=user.employee_profile, **secure_data)
 
     @extend_schema(
         summary="Clock-Out", 
