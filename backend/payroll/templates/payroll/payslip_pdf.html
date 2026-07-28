@@ -194,7 +194,7 @@
                 <tbody>
                     <tr>
                         <td>حقوق پایه و مزایا (ناخالص)</td>
-                        <td class="amount">{{ payslip.gross_salary }}</td>
+                        <td class="amount">{{ payslip.gross_salary|floatformat:"0" }}</td>
                     </tr>
                     <tr>
                         <td>کسورات مالیات ({{ payslip.applied_tax_rate }}%)</td>
