@@ -9,6 +9,7 @@ from hr.api.pagination import StandardResultsSetPagination
 
 from .permissions import IsFinanceManagerOrAdmin
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
