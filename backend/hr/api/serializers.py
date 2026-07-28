@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.db import transaction
 from accounts.models import User
 from hr.models import Department, Employee, Contract, ContractType, Attendance, LeaveType, LeaveRequest
-
+from django.utils import timezone
+from hr.models import EmployeeDocument
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
@@ -10,12 +11,19 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class EmployeeListSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True)
     phone_number = serializers.CharField(source='user.phone_number', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     
     class Meta:
         model = Employee
-        fields = ['id', 'email','phone_number' ,'employee_code', 'national_id', 'department', 'department_name', 'hire_date', 'is_deleted']
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'phone_number', 
+            'employee_code', 'national_id', 'department', 'department_name', 
+            'job_title', 'profile_picture', 'hire_date', 'is_deleted'
+        ]
 
 class EmployeeRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -69,6 +77,25 @@ class EmployeeRegistrationSerializer(serializers.Serializer):
             )
         return employee
 
+class EmployeeProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+
+    class Meta:
+        model = Employee
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'employee_code', 
+            'national_id', 'department_name', 'job_title', 
+            'profile_picture', 'date_of_birth', 'gender',
+            'address', 'phone', 'emergency_contact_name', 
+            'emergency_contact_phone', 'hire_date'
+        ]
+        read_only_fields = [
+            'employee_code', 'national_id', 'department_name', 'hire_date', 'job_title'
+        ]
+
 class ContractTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractType
@@ -97,14 +124,31 @@ class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = '__all__'
+        read_only_fields = ['employee']
+        
+        extra_kwargs = {
+            'status': {'required': False},
+            'date': {'required': False},
+            'clock_in': {'required': False},
+            'clock_out': {'required': False},
+        }
 
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Attendance.objects.all(),
-                fields=['employee', 'date'],
-                message="Attendance for this employee on this date has already been recorded."
-            )
-        ]
+    def validate(self, attrs):
+        request = self.context.get('request')
+        
+        date = attrs.get('date')
+        if not date:
+            date = timezone.localtime(timezone.now()).date()
+
+        if request and hasattr(request.user, 'employee_profile'):
+            if request.user.role == 'Employee':
+                employee = request.user.employee_profile
+                if Attendance.objects.filter(employee=employee, date=date).exists():
+                    raise serializers.ValidationError(
+                        {"detail": "ورود شما برای امروز قبلاً ثبت شده است."} 
+                    )
+                
+        return attrs
 
 class LeaveTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -115,9 +159,13 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
     """
         Only for HRmanager
     """
+    employee_name = serializers.CharField(source='employee.user.get_full_name', read_only=True)
+    leave_type_name = serializers.CharField(source='leave_type.name', read_only=True)
     class Meta:
         model = LeaveRequest
         fields = '__all__'
+
+    extra_kwargs = {'employee': {'required': False}}
 
     def validate(self, attrs):
         start_date = attrs.get("start_date", self.instance.start_date if self.instance else None)
@@ -129,9 +177,23 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class LeaveRequestEmployeeSerializer(LeaveRequestHRSerializer):
+class LeaveRequestEmployeeSerializer(serializers.ModelSerializer):
     """
-        For employees
+        For Employee
     """
-    class Meta(LeaveRequestHRSerializer.Meta):
-        read_only_fields = ['status', 'approved_by']
+    class Meta:
+        model = LeaveRequest
+        fields = ['id', 'leave_type', 'start_date', 'end_date', 'reason']   
+        read_only_fields = ['employee', 'status', 'approved_by']
+
+class EmployeeDocumentSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.user.get_full_name', read_only=True)
+    document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
+
+    class Meta:
+        model = EmployeeDocument
+        fields = [
+            'id', 'employee', 'employee_name', 'document_type', 
+            'document_type_display', 'title', 'file', 'created_at'
+        ]
+        extra_kwargs = {'employee': {'required': False}}

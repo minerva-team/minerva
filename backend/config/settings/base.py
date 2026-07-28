@@ -149,6 +149,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+# --- Media -----------------------------------------------------------------
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # ==========================================
 # CORS Settings
 # ==========================================
@@ -252,8 +257,8 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "darkly",
-    "dark_mode_theme": "darkly",
+    "theme": "darkly", 
+    "default_theme_mode": "dark", 
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
