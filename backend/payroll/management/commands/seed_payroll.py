@@ -8,7 +8,7 @@ from hr.models import Employee, Contract
 from payroll.models import PayrollConfig, Payslip
 
 class Command(BaseCommand):
-    help = "Seed Payroll app safely (idempotent, optimized)"
+    help = "Seed Payroll app safely (idempotent, optimized, Persian localized)"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -37,7 +37,7 @@ class Command(BaseCommand):
                     "overtime_multiplier": Decimal("1.50"),
                 }
             )
-            self.stdout.write(self.style.SUCCESS("✓ PayrollConfig ready (مالیات ۱۰٪ و بیمه ۷٪)"))
+            self.stdout.write(self.style.SUCCESS("✓ تنظیمات حقوق و دستمزد آماده شد (مالیات ۱۰٪ و بیمه ۷٪)"))
 
             # ==================================================
             # 2. Employees & Contracts
@@ -49,7 +49,7 @@ class Command(BaseCommand):
             )
 
             if not employees:
-                self.stdout.write(self.style.ERROR("❌ No employees found. Run HR seed first."))
+                self.stdout.write(self.style.ERROR("❌ هیچ کارمندی یافت نشد. لطفاً ابتدا seeder بخش HR را اجرا کنید."))
                 return
 
             contracts = (
@@ -137,6 +137,6 @@ class Command(BaseCommand):
                 Payslip.objects.bulk_create(payslips, batch_size=500)
 
             if skipped_contract:
-                self.stdout.write(self.style.WARNING(f"⚠ {skipped_contract} employees skipped (no active contract)"))
+                self.stdout.write(self.style.WARNING(f"⚠ {skipped_contract} کارمند به دلیل نداشتن قرارداد فعال نادیده گرفته شدند."))
 
-            self.stdout.write(self.style.SUCCESS(f"✓ {len(payslips)} payslips created successfully"))
+            self.stdout.write(self.style.SUCCESS(f"✓ {len(payslips)} فیش حقوقی با موفقیت ایجاد شد."))
