@@ -201,11 +201,12 @@ export default function Employee360View() {
         <motion.div variants={itemVariants} className="col-span-1 flex flex-col rounded-3xl border border-white/[0.04] bg-[#1c1c1e]/40 p-6 backdrop-blur-xl h-full">
           <h2 className="text-sm font-bold text-white/80 tracking-wide mb-2">اطلاعات سازمانی</h2>
           
-          <div className="flex flex-col flex-1 justify-center divide-y divide-white/[0.03]">
+          <div className="flex flex-col gap-3 mt-4 flex-1 justify-start">
             
-            <div className="flex items-center gap-4 text-white/70 py-4 group">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.02] transition-colors group-hover:bg-white/[0.06]">
-                <Mail size={16} className="text-white/50" />
+            {/* ایمیل */}
+            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.02] text-white/60">
+                <Mail size={18} />
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
                 <span className="text-[11px] text-white/40 font-medium">ایمیل سازمانی</span>
@@ -213,9 +214,10 @@ export default function Employee360View() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-white/70 py-4 group">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.02] transition-colors group-hover:bg-white/[0.06]">
-                <Phone size={16} className="text-white/50" />
+            {/* موبایل */}
+            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.02] text-white/60">
+                <Phone size={18} />
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[11px] text-white/40 font-medium">موبایل</span>
@@ -223,9 +225,10 @@ export default function Employee360View() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-white/70 py-4 group">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.02] transition-colors group-hover:bg-white/[0.06]">
-                <Briefcase size={16} className="text-white/50" />
+            {/* دپارتمان */}
+            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.02] text-white/60">
+                <Briefcase size={18} />
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[11px] text-white/40 font-medium">دپارتمان</span>
@@ -233,9 +236,10 @@ export default function Employee360View() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-white/70 py-4 group">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.02] transition-colors group-hover:bg-white/[0.06]">
-                <Calendar size={16} className="text-white/50" />
+            {/* تاریخ استخدام */}
+            <div className="flex items-center gap-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] p-4 transition-colors hover:bg-white/[0.05]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.02] text-white/60">
+                <Calendar size={18} />
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[11px] text-white/40 font-medium">تاریخ استخدام</span>
