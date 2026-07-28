@@ -140,6 +140,70 @@ class EmployeeViewSet(HRBaseViewSet):
             serializer.save()
             return Response(serializer.data)
 
+    # ========================================================
+    # Employee 360-Degree Metrics (HR/Admin Only)
+    # ========================================================
+    @extend_schema(
+        summary="Employee 360 Metrics (مدیران)",
+        description="دریافت تجمیعی اطلاعات مالی، آمار مرخصی و روند ساعات کاری ۷ روز گذشته برای داشبورد مدیران.",
+        tags=["Employees"]
+    )
+    @action(
+        detail=True, 
+        methods=['get'], 
+        url_path='360-metrics',
+        permission_classes=[IsHRManagerRole] 
+    )
+    def metrics_360(self, request, pk=None):
+        employee = self.get_object()
+        local_time = timezone.localtime(timezone.now())
+        today = local_time.date()
+
+        active_contract = Contract.objects.filter(employee=employee, is_active=True).first()
+        financials = {
+            "baseSalary": f"{active_contract.base_salary:,.0f} تومان" if active_contract else "نامشخص",
+            "contractType": active_contract.contract_type.name if active_contract and active_contract.contract_type else "بدون قرارداد"
+        }
+
+        annual_used = LeaveRequest.objects.filter(
+            employee=employee, status='Approved', leave_type__name__icontains='استحقاقی'
+        ).count()
+        sick_used = LeaveRequest.objects.filter(
+            employee=employee, status='Approved', leave_type__name__icontains='استعلاجی'
+        ).count()
+
+        leaves = {
+            "annual": {"used": annual_used, "total": 26},
+            "sick": {"used": sick_used, "total": 10}
+        }
+
+        persian_weekdays = {
+            5: 'شنبه', 6: 'یکشنبه', 0: 'دوشنبه', 
+            1: 'سه‌شنبه', 2: 'چهارشنبه', 3: 'پنجشنبه', 4: 'جمعه'
+        }
+        
+        attendance_trend = []
+        for i in range(6, -1, -1):
+            d = today - timedelta(days=i)
+            record = Attendance.objects.filter(employee=employee, date=d).first()
+            
+            hours_worked = 0
+            if record and record.clock_in and record.clock_out:
+                in_time = timedelta(hours=record.clock_in.hour, minutes=record.clock_in.minute)
+                out_time = timedelta(hours=record.clock_out.hour, minutes=record.clock_out.minute)
+                diff = out_time - in_time
+                hours_worked = round(diff.total_seconds() / 3600, 1) 
+            attendance_trend.append({
+                "day": persian_weekdays[d.weekday()],
+                "hours": hours_worked
+            })
+
+        return Response({
+            "financials": financials,
+            "leaves": leaves,
+            "attendanceTrend": attendance_trend
+        }, status=status.HTTP_200_OK)
+
 # ==========================================
 # Employee Document ViewSet
 # ==========================================
