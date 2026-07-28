@@ -178,7 +178,6 @@ class Command(BaseCommand):
             )
 
 
-            # Existing count in one query
 
             existing_counts = {
 
