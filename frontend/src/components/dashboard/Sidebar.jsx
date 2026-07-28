@@ -1,8 +1,9 @@
 import { useNavigate, NavLink } from 'react-router-dom'
-import { LayoutDashboard, Wallet, Clock3, Calendar, CalendarCheck, Network, LogOut, User } from 'lucide-react'
+import { LayoutDashboard, Wallet, Clock3, CalendarCheck, Network, LogOut, FileText } from 'lucide-react'
 
 import SidebarItem from './SidebarItem'
 import UserAvatar from '../ui/UserAvatar'
+
 const topMenuItems = [
   {
     title: 'داشبورد',
@@ -16,17 +17,28 @@ const topMenuItems = [
     icon: Clock3,
   },
   {
+    title: 'فیش‌های حقوقی من',
+    to: '/dashboard/payslips/me',
+    icon: FileText,
+  },
+  {
     title: 'مدیریت مرخصی‌ها',
     to: '/dashboard/hr-leaves',
     icon: CalendarCheck,
     roles: ['HR Manager', 'Admin'], 
   },
   {
-  title: 'ساختار سازمانی',
-  to: '/dashboard/org-chart',
-  icon: Network,
-  roles: ['Admin', 'HR Manager'], 
-},
+    title: 'مدیریت مالی و حقوق',
+    to: '/dashboard/finance/payroll',
+    icon: Wallet,
+    roles: ['Finance Manager', 'Admin'], 
+  },
+  {
+    title: 'ساختار سازمانی',
+    to: '/dashboard/org-chart',
+    icon: Network,
+    roles: ['Admin', 'HR Manager'], 
+  },
 ]
 
 export default function Sidebar() {
@@ -34,6 +46,8 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem('access')
+    localStorage.removeItem('access_token') 
+    localStorage.removeItem('userRole')
     navigate('/login')
   }
   

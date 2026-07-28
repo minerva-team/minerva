@@ -10,6 +10,8 @@ import OrganizationChart from '@/pages/OrganizationChart'
 import ProtectedRoute from './ProtectedRoute'
 import HrLeaveManagement from '../pages/HrLeaveManagement' 
 import Employee360View from '@/pages/Employee360View' 
+import EmployeePayslipPortal from "../pages/EmployeePayslipPortal";
+import FinanceControlCenter from "../pages/FinanceControlCenter";
 
 const RequireRole = ({ allowedRoles, children }) => {
   const userRole = localStorage.getItem('userRole') || 'Employee'
@@ -34,8 +36,11 @@ export default function AppRoutes() {
           
           <Route path="attendance" element={<AttendanceLeave />} />
           <Route path="profile" element={<Profile />} />
-          
           <Route path="employee/:id" element={<Employee360View />} />
+          
+          {/* 👇 اینجا اسلش اول رو برداشتم */}
+          <Route path="payslips/me" element={<EmployeePayslipPortal />} />
+          <Route path="finance/payroll" element={<FinanceControlCenter />} />
           
           <Route 
             path="org-chart" 
@@ -43,7 +48,7 @@ export default function AppRoutes() {
               <RequireRole allowedRoles={['HR Manager', 'Admin']}>
                 <OrganizationChart />
               </RequireRole>
-            } 
+            }   
           />
           
           <Route 
