@@ -2,7 +2,7 @@
 import { apiFetch } from './client'
 
 export function getAttendance() {
-  return apiFetch('/hr/attendance/')
+  return apiFetch('/hr/attendance/?my_records=true')
 }
 
 export function clockIn(data) {

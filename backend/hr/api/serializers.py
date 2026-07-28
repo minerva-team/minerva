@@ -164,8 +164,7 @@ class LeaveRequestHRSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaveRequest
         fields = '__all__'
-
-    extra_kwargs = {'employee': {'required': False}}
+        extra_kwargs = {'employee': {'required': False}}
 
     def validate(self, attrs):
         start_date = attrs.get("start_date", self.instance.start_date if self.instance else None)
