@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>فیش حقوقی - مینروا</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            background-color: #fbfbfd;
+        }
+        body {
+            font-family: 'Vazir', Tahoma, Arial, sans-serif;
+            color: #1d1d1f;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #fbfbfd;
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            margin: auto;
+        }
+        
+        /* Header Box */
+        .header-box {
+            background-color: #ffffff;
+            border-radius: 18px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e5ea;
+        }
+        .logo-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .accent-line {
+            width: 48px;
+            height: 4px;
+            background-color: #7c3aed;
+            border-radius: 2px;
+            margin: 0 auto 16px auto;
+        }
+        .logo-section h1 {
+            margin: 0;
+            font-size: 28pt;
+            color: #1d1d1f;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .logo-section h2 {
+            margin: 8px 0 0 0;
+            font-size: 13pt;
+            color: #86868b;
+            font-weight: 400;
+        }
+
+        /* Employee Info Grid */
+        .info-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 12px;
+            margin-top: 10px;
+        }
+        .info-cell {
+            background-color: #f5f5f7;
+            border-radius: 14px;
+            padding: 16px 20px;
+            width: 50%;
+            vertical-align: middle;
+        }
+        .info-label {
+            font-size: 10pt;
+            color: #86868b;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .info-value {
+            font-size: 12pt;
+            color: #1d1d1f;
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Salary Details Table */
+        .table-container {
+            background-color: #ffffff;
+            border-radius: 18px;
+            border: 1px solid #e5e5ea;
+            padding: 12px;
+            margin-top: 24px;
+        }
+        .salary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .salary-table th {
+            text-align: right;
+            font-size: 11pt;
+            color: #86868b;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e5ea;
+            font-weight: normal;
+        }
+        .salary-table td {
+            padding: 16px 20px;
+            font-size: 12pt;
+            border-bottom: 1px solid #e5e5ea;
+            color: #1d1d1f;
+        }
+        .salary-table tr:last-child td {
+            border-bottom: none;
+        }
+        .amount {
+            font-family: 'Vazir', monospace;
+            text-align: left !important;
+            direction: ltr;
+        }
+        
+        /* Total Row */
+        .total-row {
+            background-color: #f9f5ff;
+        }
+        .total-row td {
+            color: #7c3aed;
+            font-size: 14pt;
+            font-weight: bold;
+            border: none;
+            border-top: 2px solid #7c3aed;
+        }
+        .total-row td:first-child {
+            border-radius: 0 12px 12px 0;
+        }
+        .total-row td:last-child {
+            border-radius: 12px 0 0 12px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 9pt;
+            color: #86868b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header & Info Card -->
+        <div class="header-box">
+            <div class="logo-section">
+                <div class="accent-line"></div>
+                <h1>مینـروا</h1>
+                <h2>فیش حقوقی - ماه {{ payslip.month }} سال {{ payslip.year }}</h2>
+            </div>
+            
+            <table class="info-table">
+                <tr>
+                    <td class="info-cell">
+                        <span class="info-label">نام کارمند</span>
+                        <span class="info-value">{{ payslip.employee.user.first_name }} {{ payslip.employee.user.last_name }}</span>
+                    </td>
+                    <td class="info-cell">
+                        <span class="info-label">کد پرسنلی</span>
+                        <span class="info-value">{{ payslip.employee.employee_code }}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="info-cell">
+                        <span class="info-label">دپارتمان</span>
+                        <span class="info-value">{{ payslip.employee.department.name }}</span>
+                    </td>
+                    <td class="info-cell">
+                        <span class="info-label">تاریخ صدور</span>
+                        <span class="info-value">{{ payslip.created_at|date:"Y/m/d" }}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Salary Details Card -->
+        <div class="table-container">
+            <table class="salary-table">
+                <thead>
+                    <tr>
+                        <th>شرح ردیف</th>
+                        <th style="text-align: left;">مبلغ (تومان)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>حقوق پایه و مزایا (ناخالص)</td>
+                        <td class="amount">{{ payslip.gross_salary|floatformat:"0" }}</td>
+                    </tr>
+                    <tr>
+                        <td>کسورات مالیات ({{ payslip.applied_tax_rate }}%)</td>
+                        <td class="amount">{{ payslip.tax_amount }}</td>
+                    </tr>
+                    <tr>
+                        <td>کسورات بیمه ({{ payslip.applied_insurance_rate }}%)</td>
+                        <td class="amount">{{ payslip.insurance_amount }}</td>
+                    </tr>
+                    <tr style="height: 12px;"><td colspan="2" style="border:none;"></td></tr>
+                    <tr class="total-row">
+                        <td>خالص پرداختی</td>
+                        <td class="amount">{{ payslip.net_salary }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- System Footer -->
+        <div class="footer">
+            این سند به صورت خودکار توسط پلتفرم مدیریت مینروا صادر شده و معتبر است.
+        </div>
+
+    </div>
+</body>
+</html>

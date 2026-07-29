@@ -29,11 +29,27 @@ class Department(BaseModel):
 class Employee(BaseModel):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='employee_profile')
     department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True, blank=True, related_name='employees')
+    job_title = models.CharField(max_length=100, blank=True)
+    reports_to = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="direct_reports")
     employee_code = models.CharField(max_length=20, unique=True)
+    profile_picture = models.ImageField(upload_to="employees/profile_pictures/", blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
     national_id = models.CharField(max_length=10, unique=True)
+    address = models.TextField(blank=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     hire_date = models.DateField()
     is_deleted = models.BooleanField(default=False)
+    
+    GENDER_CHOICES = [
+    ("M", "Male"),
+    ("F", "Female"),
+    ("O", "Other"),
+    ]
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    
+    emergency_contact_name = models.CharField(max_length=100, blank=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True)
+    emergency_contact_relationship = models.CharField(max_length=50, blank=True)
     
     objects = models.Manager()
     active_employees = ActiveEmployeeManager()
@@ -49,16 +65,44 @@ class Employee(BaseModel):
     def __str__(self):
         return f"{self.user.email} ({self.employee_code})"
 
+class EmployeeDocument(BaseModel):
+    DOCUMENT_TYPE_CHOICES = [
+        ("contract", "Contract"),
+        ("resume", "Resume"),
+        ("identity", "Identity Document"),
+        ("certificate", "Certificate"),
+        ("other", "Other"),
+    ]
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="documents")
+    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES)
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to="employees/documents/")
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Employee Document"
+        verbose_name_plural = "Employee Documents"
+        
+    def __str__(self):
+        return f"{self.employee.employee_code} - {self.title}"
+    
+class ContractType(BaseModel):
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Contract Type"
+        verbose_name_plural = "Contract Types"
+
+    def __str__(self):
+        return self.name
+
 
 class Contract(BaseModel):
-    CONTRACT_TYPE_CHOICES = [
-        ('Full-time', 'Full-time'),
-        ('Part-time', 'Part-time'),
-        ('Hourly', 'Hourly'),
-    ]
-    
+
     employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
-    contract_type = models.CharField(max_length=20, choices=CONTRACT_TYPE_CHOICES)
+    contract_type = models.ForeignKey(ContractType, on_delete=models.PROTECT, related_name='contracts')
     base_salary = models.DecimalField(max_digits=12, decimal_places=2)
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
